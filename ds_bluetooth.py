@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from bleak import BleakScanner, BleakClient
+from bleak import BleakScanner, BleakClient, BleakError
 from datetime import datetime
 
 
@@ -26,7 +26,7 @@ loop.run_until_complete(run())
 
 # Connect to device and read its model number
 # 74B1AEEB-6720-4DCB-94BC-623775EA3529: ELEGOO BT16
-UUID_NORDIC_TX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+UUID_NORDIC_TX = "0000ffe2-0000-1000-8000-00805f9b34fb"
 UUID_NORDIC_RX = "0000ffe1-0000-1000-8000-00805f9b34fb"
 command = b"Test\n"
 
@@ -47,8 +47,16 @@ async def run(address, loop):
     async with BleakClient(address, loop=loop, disconnected_callback=disconnected_callback) as client:
         print("Connected")
 
-        print("Starting notify callback")
-        await client.start_notify(UUID_NORDIC_RX, uart_data_received)
+        # print("Starting notify callback")
+        # await client.start_notify(UUID_NORDIC_RX, uart_data_received)
+
+        while True:
+            print("Sending command")
+            # await client.write_gatt_char(UUID_NORDIC_TX, bytearray("!c200046\r\n", encoding='utf8'), False)
+            await client.write_gatt_char(UUID_NORDIC_TX, bytearray("!j00000000000000008B\r\n", encoding='utf8'), False)
+            await asyncio.sleep(
+                1.0
+            )
 
         print("Sleeping until device disconnects...")
         await disconnected_event.wait()
@@ -66,6 +74,9 @@ async def run(address, loop):
         #   await client.write_gatt_char(UUID_NORDIC_TX, bytearray(c[0:20]), True)
         #   c = c[20:]
 
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(run(address, loop))
+while True:
+    try:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(run(address, loop))
+    except BleakError as e:
+        print(e)
