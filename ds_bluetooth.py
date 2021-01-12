@@ -31,6 +31,7 @@ loop.run_until_complete(run())
 
 # Connect to device and read its model number
 # 74B1AEEB-6720-4DCB-94BC-623775EA3529: ELEGOO BT16
+# NOTE: These are not the nordic UUIDs, but what I pulled from the module... see explorer.py
 UUID_NORDIC_TX = "0000ffe2-0000-1000-8000-00805f9b34fb"
 UUID_NORDIC_RX = "0000ffe1-0000-1000-8000-00805f9b34fb"
 command = b"Test\n"

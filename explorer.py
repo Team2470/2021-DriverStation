@@ -62,6 +62,7 @@ if __name__ == "__main__":
     loop.run_until_complete(run(address, True))
 
 
+# Output from my (Ryan) module:
 # Connected: True
 # [Service] 0000ffe0-0000-1000-8000-00805f9b34fb: Vendor specific
 # 	[Characteristic] 0000ffe1-0000-1000-8000-00805f9b34fb: (Handle: 2) (notify) | Name: Vendor specific, Value: None
