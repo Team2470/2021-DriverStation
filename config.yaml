@@ -1,0 +1,7 @@
+comm_mode: serial
+
+serial:
+  baudrate: 57600
+  #port: /dev/cu.usbmodem4101
+  port: /dev/cu.usbmodem00001
+  timeout: 5 # Seconds

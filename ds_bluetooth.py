@@ -1,11 +1,16 @@
 #! /usr/bin/env python3
 
+#
+# This program
+#
+
 import asyncio
 import logging
 from bleak import BleakScanner, BleakClient, BleakError
 from datetime import datetime
 
 
+# macOS uses a UUID thing instead of a the modules mac address
 address = "74B1AEEB-6720-4DCB-94BC-623775EA3529"
 
 # Discover available devices
