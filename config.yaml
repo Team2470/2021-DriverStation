@@ -1,7 +1,16 @@
-comm_mode: serial
+communication_backend: serial
 
 serial:
   baudrate: 57600
   #port: /dev/cu.usbmodem4101
   port: /dev/cu.usbmodem00001
   timeout: 5 # Seconds
+
+
+bluetooth:
+  mac_address: 74B1AEEB-6720-4DCB-94BC-623775EA3529
+
+# Joystick UUID mapping to number
+# TODO This will be updated by the driverstation
+joystick_mapping:
+  030000006d04000016c2000014040000: 0

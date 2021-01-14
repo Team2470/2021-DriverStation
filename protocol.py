@@ -4,28 +4,11 @@ from suitcase.structure import Structure
 from suitcase.fields import BaseField
 from suitcase.fields import Magic
 from suitcase.fields import CRCField
-from suitcase.fields import SLInt8
-from suitcase.fields import ULInt8
 
 PACKET_START_CHAR = "!"
 PROTOCOL_FLOAT_LENGTH = 7
 PROTOCOL_UINT16_LENGTH = 4
 PROTOCOL_UINT8_LENGTH = 2
-
-# MSGID_YPR_UPDATE = 'y'
-# YPR_UPDATE_MESSAGE_LENGTH = 34
-#
-# MSGID_QUATERNION_UPDATE = 'q'
-# QUATERNION_UPDATE_MESSAGE_LENGTH = 53
-#
-# MSGID_GYRO_UPDATE = 'g'
-# GYRO_UPDATE_MESSAGE_LENGTH = 46
-#
-# MSGID_STREAM_CMD = 'S'
-# STREAM_CMD_MESSAGE_LENGTH = 9
-#
-# MSG_ID_STREAM_RESPONSE = 's'
-# STREAM_RESPONSE_MESSAGE_LENGTH = 46
 
 MSGID_DS_CONTROL = 'c'
 DS_CONTROL_LENGTH  = 10
@@ -36,7 +19,6 @@ DS_JOYSTICK_LENGTH =                22
 
 MSGID_ROBOT_STATUS = 'S'
 ROBOT_STATUS_LENGTH =                 10
-
 
 
 def valid_message(data):
@@ -92,7 +74,6 @@ class ProtocolUInt16(BaseField):
 
     def unpack(self, data):
         # Expecting a hexadecimal string
-
         self._value = np.uint16(int(data, 16))
 
 
@@ -181,10 +162,6 @@ class Joystick1Packet(Structure):
 
     checksum = CRCField(ProtocolChecksum(), checksum, 0, -4)
     termination = Magic(bytearray("\r\n", "utf8"))
-
-
-# def is_stream_response(data):
-#     return len(data) >= 2 and data[1] == MSG_ID_STREAM_RESPONSE
 
 
 if __name__ == "__main__":
