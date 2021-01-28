@@ -2,3 +2,5 @@ bleak
 structlog
 pyserial
 pygame
+pyside6
+pyyaml
