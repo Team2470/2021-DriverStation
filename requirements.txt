@@ -4,3 +4,6 @@ pyserial
 pygame
 pyside6
 pyyaml
+colorama
+numpy
+suitcase
