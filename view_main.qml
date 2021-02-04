@@ -6,28 +6,33 @@ import QtQuick.Controls.Material 2.12
 
 ApplicationWindow {
     id: window
-    width: 500
-    height: 200
+    width: 300
+    height: 150
     visible: true
+
+    property int connChanged: 0
 
     Connections {
         target: con
 
         // Signal Handlers
         function onConnectionChanged(connected) {
-            btn_connect.text = con.is_connected_text()
-            if (con.is_connected()) {
-                btn_connect.Material.accent=Material.Red
-            } else {
-                btn_connect.Material.accent=Material.Green
-            }
+            // Odd hack to force our properties below to update
+            // There should be a better way to do this
+            connChanged++
         }
     }
 
-   menuBar: MenuBar {
+    menuBar: MenuBar {
         Menu {
             title: qsTr("&File")
-            Action { text: qsTr("&Quit") }
+
+            Action {
+                text: qsTr("&Quit")
+                onTriggered: {
+                    Qt.quit()
+                }
+            }
         }
         Menu {
             title: qsTr("&Help")
@@ -41,20 +46,21 @@ ApplicationWindow {
         columns: 1
         rows: 2
 
+
         RowLayout {
             spacing: 20
-            Layout.preferredWidth: 400
+            Layout.leftMargin: 10
 
             Text {
                 id: conLabel
-                Layout.alignment: Qt.AlignHLeft
+                Layout.alignment: Qt.AlignLeft
                 color: "black"
                 font.pointSize: 14
                 text: "Connection:"
             }
             Text {
                 id: conType
-                Layout.alignment: Qt.AlignHLeft
+                Layout.alignment: Qt.AlignLeft
                 color: "black"
                 font.pointSize: 14
                 text: con.get_connection()
@@ -64,12 +70,13 @@ ApplicationWindow {
         RowLayout {
             spacing: 20
             Layout.preferredWidth: 400
+            Layout.leftMargin: 10
 
             Button {
                     id: btn_connect
-                    text: con.is_connected_text()
+                    text: connChanged, con.is_connected_text()
                     highlighted: true
-                    Material.accent: Material.Green
+                    Material.accent: connChanged, con.is_connected() ? Material.Green : Material.Red
                     onClicked: {
                         if (!con.is_connected()) {
                             con.connect()
@@ -82,7 +89,16 @@ ApplicationWindow {
     }
 
     footer: ToolBar {
-
+        height: 20
+        RowLayout {
+            Label {
+                text: "Sent: 0 Received: 0"
+                elide: Label.ElideRight
+                horizontalAlignment: Qt.AlignHCenter
+                verticalAlignment: Qt.AlignVCenter
+                Layout.fillWidth: true
+            }
+        }
     }
 }
 
