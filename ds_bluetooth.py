@@ -61,7 +61,7 @@ async def run(address, loop):
             # await client.write_gatt_char(UUID_NORDIC_TX, bytearray("!c200046\r\n", encoding='utf8'), False)
             await client.write_gatt_char(UUID_NORDIC_TX, bytearray("!j00000000000000008B\r\n", encoding='utf8'), False)
             await asyncio.sleep(
-                1.0
+                0.02
             )
 
         print("Sleeping until device disconnects...")
