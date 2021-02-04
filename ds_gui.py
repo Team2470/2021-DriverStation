@@ -2,7 +2,7 @@ import sys
 from os.path import abspath, dirname, join
 
 from PySide6.QtQuick import QQuickView
-from PySide6.QtCore import QObject, Slot
+from PySide6.QtCore import QObject, Signal, Slot
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -10,54 +10,36 @@ from driver_station import DriverStation
 
 
 class ViewModelMain(QObject):
+    connectionChanged = Signal(bool, arguments=['connected'])
 
     def __init__(self, ds):
         self.ds = ds
         super().__init__()
 
     @Slot(result=str)
-    def getConnection(self):
+    def get_connection(self):
         return ds.config["communication_backend"]
 
-    @Slot(str, result=str)
-    def getColor(self, color_name):
-        if color_name.lower() == "red":
-            return "#ef9a9a"
-        elif color_name.lower() == "green":
-            return "#a5d6a7"
-        elif color_name.lower() == "blue":
-            return "#90caf9"
-        else:
-            return "white"
+    @Slot(result=bool)
+    def is_connected(self):
+        return ds.is_connected()
 
-    @Slot(float, result=int)
-    def getSize(self, s):
-        size = int(s * 42) # Maximum font size
-        if size <= 0:
-            return 1
+    @Slot(result=str)
+    def is_connected_text(self):
+        if self.is_connected():
+            return "Disconnect"
         else:
-            return size
+            return "Connect"
 
-    @Slot(str, result=bool)
-    def getItalic(self, s):
-        if s.lower() == "italic":
-            return True
-        else:
-            return False
+    @Slot()
+    def connect(self):
+        ds.connect()
+        self.connectionChanged.emit(self.is_connected())
 
-    @Slot(str, result=bool)
-    def getBold(self, s):
-        if s.lower() == "bold":
-            return True
-        else:
-            return False
-
-    @Slot(str, result=bool)
-    def getUnderline(self, s):
-        if s.lower() == "underline":
-            return True
-        else:
-            return False
+    @Slot()
+    def disconnect(self):
+        ds.disconnect()
+        self.connectionChanged.emit(self.is_connected())
 
 
 if __name__ == "__main__":
@@ -70,8 +52,7 @@ if __name__ == "__main__":
     engine = QQmlApplicationEngine()
 
     # Expose the Python object to QML
-    context = engine.rootContext()
-    context.setContextProperty("con", vm_main)
+    engine.rootContext().setContextProperty("con", vm_main)
 
     # Get the path of the current directory, and then add the name
     # of the QML file, to load it.

@@ -6,25 +6,28 @@ import QtQuick.Controls.Material 2.12
 
 ApplicationWindow {
     id: window
-    width: 800
-    height: 400
+    width: 500
+    height: 200
     visible: true
+
+    Connections {
+        target: con
+
+        // Signal Handlers
+        function onConnectionChanged(connected) {
+            btn_connect.text = con.is_connected_text()
+            if (con.is_connected()) {
+                btn_connect.Material.accent=Material.Red
+            } else {
+                btn_connect.Material.accent=Material.Green
+            }
+        }
+    }
 
    menuBar: MenuBar {
         Menu {
             title: qsTr("&File")
-            Action { text: qsTr("&New...") }
-            Action { text: qsTr("&Open...") }
-            Action { text: qsTr("&Save") }
-            Action { text: qsTr("Save &As...") }
-            MenuSeparator { }
             Action { text: qsTr("&Quit") }
-        }
-        Menu {
-            title: qsTr("&Edit")
-            Action { text: qsTr("Cu&t") }
-            Action { text: qsTr("&Copy") }
-            Action { text: qsTr("&Paste") }
         }
         Menu {
             title: qsTr("&Help")
@@ -35,132 +38,45 @@ ApplicationWindow {
 
     GridLayout {
         id: grid
-        columns: 2
-        rows: 3
+        columns: 1
+        rows: 2
 
-        ColumnLayout {
-            spacing: 2
+        RowLayout {
+            spacing: 20
             Layout.preferredWidth: 400
 
             Text {
-                id: leftlabel
-                Layout.alignment: Qt.AlignHCenter
+                id: conLabel
+                Layout.alignment: Qt.AlignHLeft
                 color: "black"
-                font.pointSize: 16
-                text: con.getConnection()
-                Layout.preferredHeight: 100
-                Material.accent: Material.Green
-
-                function updateConnection(text) {
-                    leftlabel.text = text
-                }
+                font.pointSize: 14
+                text: "Connection:"
             }
-
-            RadioButton {
-                id: italic
-                text: "Italic"
-                onToggled: {
-                    leftlabel.font.italic = con.getItalic(italic.text)
-                    leftlabel.font.bold = con.getBold(italic.text)
-                    leftlabel.font.underline = con.getUnderline(italic.text)
-                }
-            }
-            RadioButton {
-                id: bold
-                text: "Bold"
-                onToggled: {
-                    leftlabel.font.italic = con.getItalic(bold.text)
-                    leftlabel.font.bold = con.getBold(bold.text)
-                    leftlabel.font.underline = con.getUnderline(bold.text)
-                }
-            }
-            RadioButton {
-                id: underline
-                text: "Underline"
-                onToggled: {
-                    leftlabel.font.italic = con.getItalic(underline.text)
-                    leftlabel.font.bold = con.getBold(underline.text)
-                    leftlabel.font.underline = con.getUnderline(underline.text)
-                }
-            }
-            RadioButton {
-                id: noneradio
-                text: "None"
-                checked: true
-                onToggled: {
-                    leftlabel.font.italic = con.getItalic(noneradio.text)
-                    leftlabel.font.bold = con.getBold(noneradio.text)
-                    leftlabel.font.underline = con.getUnderline(noneradio.text)
-                }
+            Text {
+                id: conType
+                Layout.alignment: Qt.AlignHLeft
+                color: "black"
+                font.pointSize: 14
+                text: con.get_connection()
             }
         }
 
-        ColumnLayout {
-            id: rightcolumn
-            spacing: 2
-            Layout.columnSpan: 1
+        RowLayout {
+            spacing: 20
             Layout.preferredWidth: 400
-            Layout.preferredHeight: 400
-            Layout.fillWidth: true
 
-            RowLayout {
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-
-                Button {
-                    id: red
-                    text: "Red"
-                    highlighted: true
-                    Material.accent: Material.Red
-                    onClicked: {
-                        leftlabel.color = con.getColor(red.text)
-                    }
-                }
-                Button {
-                    id: green
-                    text: "Green"
+            Button {
+                    id: btn_connect
+                    text: con.is_connected_text()
                     highlighted: true
                     Material.accent: Material.Green
                     onClicked: {
-                        leftlabel.color = con.getColor(green.text)
+                        if (!con.is_connected()) {
+                            con.connect()
+                        } else {
+                            con.disconnect()
+                        }
                     }
-                }
-                Button {
-                    id: blue
-                    text: "Blue"
-                    highlighted: true
-                    Material.accent: Material.Blue
-                    onClicked: {
-                        leftlabel.color = con.getColor(blue.text)
-                    }
-                }
-                Button {
-                    id: nonebutton
-                    text: "None"
-                    highlighted: true
-                    Material.accent: Material.BlueGrey
-                    onClicked: {
-                        leftlabel.color = con.getColor(nonebutton.text)
-                    }
-                }
-            }
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-                Text {
-                    id: rightlabel
-                    color: "white"
-                    text: "Font size"
-                    Material.accent: Material.White
-                }
-                Slider {
-                    width: rightcolumn.width * 0.6
-                    Layout.alignment: Qt.AlignRight
-                    id: slider
-                    value: 0.5
-                    onValueChanged: {
-                        leftlabel.font.pointSize = con.getSize(value)
-                    }
-                }
             }
         }
     }

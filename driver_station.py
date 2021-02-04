@@ -28,9 +28,9 @@ class DriverStation:
         # Communication backend
         communication_backend_name = self.config["communication_backend"]
         if communication_backend_name == "serial":
-            communication_backend = SerialBackend(self.config["serial"])
+            self.communication_backend = SerialBackend(self.config["serial"])
         elif communication_backend_name == "bluetooth":
-            communication_backend = BluetoothBackend(self.config["bluetooth"])
+            self.communication_backend = BluetoothBackend(self.config["bluetooth"])
         else:
             self.logger.fatal("Unsupported backend", communication_backend=communication_backend_name)
 
@@ -39,6 +39,25 @@ class DriverStation:
 
     def get_settings(self):
         return self.config
+
+    def connect(self):
+        try:
+            self.communication_backend.connect()
+        except PortNotOpenError as e:
+            self.logger.fatal("Unable to open serial port:" + str(e))
+
+    def disconnect(self):
+        # Todo: Shut down the thread
+        try:
+            self.communication_backend.disconnect()
+        except PortNotOpenError as e:
+            self.logger.fatal("Unable to close serial port:" + str(e))
+
+    def is_connected(self):
+        if self.communication_backend is not None:
+            return self.communication_backend.is_connected()
+        else:
+            return False
 
     def run(self):
         self.logger.info("Starting...")
@@ -93,13 +112,6 @@ class DriverStation:
                     self.communication_backend.write(p)
 
                 time.sleep(0.02)
-
-        # Try to see if the serial port is open...
-        try:
-            self.communication_backend.init()
-        except PortNotOpenError as e:
-            self.logger.fatal("Unable to open serial port:" + str(e))
-            sys.exit(1)
 
         # Start threads...
         comm_read_thread = threading.Thread(target=comm_read_loop)

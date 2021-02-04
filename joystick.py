@@ -6,6 +6,7 @@ import structlog
 log.setup()
 logger = structlog.get_logger()
 
+
 class JoystickState:
     def __init__(self, axis, buttons, hats):
         self.axis = axis

@@ -15,7 +15,7 @@ class BluetoothBackend(CommunicationBackend):
         logger.info("Using Bluetooth communication backend", config=config)
         # TODO
 
-    def init(self):
+    def connect(self):
         logger.info("Trying to setup bluetooth", port=self.port.port)
         # TODO
 

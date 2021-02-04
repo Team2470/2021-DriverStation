@@ -22,9 +22,16 @@ class SerialBackend(CommunicationBackend):
         self.port.baudrate = config["baudrate"]
         self.port.timeout = config["timeout"]
 
-    def init(self):
+    def connect(self):
         logger.info("Trying to open serial port", port=self.port.port)
         self.port.open()
+
+    def disconnect(self):
+        logger.info("Trying to close serial port", port=self.port.port)
+        self.port.close()
+
+    def is_connected(self):
+        return self.port.is_open
 
     def read(self):
         data = self.port.readline()

@@ -2,8 +2,16 @@
 class CommunicationBackend:
     # Communication backend Interface
 
-    def init(self):
+    def connect(self):
         # Initialize the backend
+        pass
+
+    def is_connected(self):
+        # Indicate the port is open or bluetooth is connected
+        pass
+
+    def disconnect(self):
+        # Disconnect from bluetooth or serial
         pass
 
     def read(self):
