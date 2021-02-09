@@ -1,4 +1,8 @@
 bleak
+suitcase
 structlog
+colorama
 pyserial
 pygame
+pyyaml
+numpy
