@@ -65,12 +65,19 @@ def run():
 
                 # Build up the joystick 1 packet
                 pkt = protocol.Joystick1Packet()
-                pkt.axis0 = joystick.axis[0]
-                pkt.axis1 = joystick.axis[1]
-                pkt.axis2 = joystick.axis[2]
-                pkt.axis3 = joystick.axis[3]
-                pkt.axis4 = joystick.axis[4]
-                pkt.axis5 = joystick.axis[5]
+                length = joystick.axis
+                if len(length) <= 1:
+                    pkt.axis0 = joystick.axis[0]
+                if len(length) <= 2:
+                    pkt.axis1 = joystick.axis[1]
+                if len(length) <= 3:
+                    pkt.axis2 = joystick.axis[2]
+                if len(length) <= 4:
+                    pkt.axis3 = joystick.axis[3]
+                if len(length) <= 5:
+                    pkt.axis4 = joystick.axis[4]
+                if len(length) <= 6:
+                    pkt.axis5 = joystick.axis[5]
                 # TODO lets do buttons later....
 
                 p = pkt.pack()
@@ -83,12 +90,19 @@ def run():
 
                 # Build up the joystick 1 packet
                 pkt = protocol.Joystick2Packet()
-                pkt.axis0 = joystick.axis[0]
-                pkt.axis1 = joystick.axis[1]
-                pkt.axis2 = joystick.axis[2]
-                pkt.axis3 = joystick.axis[3]
-                pkt.axis4 = joystick.axis[4]
-                pkt.axis5 = joystick.axis[5]
+                length = joystick.axis
+                if len(length) <= 1:
+                    pkt.axis0 = joystick.axis[0]
+                if len(length) <= 2:
+                    pkt.axis1 = joystick.axis[1]
+                if len(length) <= 3:
+                    pkt.axis2 = joystick.axis[2]
+                if len(length) <= 4:
+                    pkt.axis3 = joystick.axis[3]
+                if len(length) <= 5:
+                    pkt.axis4 = joystick.axis[4]
+                if len(length) <= 6:
+                    pkt.axis5 = joystick.axis[5]
                 # TODO lets do buttons later....
 
                 p = pkt.pack()
