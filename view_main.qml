@@ -6,9 +6,10 @@ import QtQuick.Controls.Material 2.12
 
 ApplicationWindow {
     id: window
-    width: 300
+    width: 600
     height: 150
     visible: true
+    title: "2021 TP Driver Station"
 
     property int connChanged: 0
 
@@ -89,12 +90,12 @@ ApplicationWindow {
     }
 
     footer: ToolBar {
-        height: 20
+        height: 25
         RowLayout {
             Label {
                 text: "Sent: 0 Received: 0"
                 elide: Label.ElideRight
-                horizontalAlignment: Qt.AlignHCenter
+                horizontalAlignment: Qt.AlignHRight
                 verticalAlignment: Qt.AlignVCenter
                 Layout.fillWidth: true
             }
