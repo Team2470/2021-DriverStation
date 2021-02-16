@@ -3,7 +3,7 @@ communication_backend: serial
 serial:
   baudrate: 57600
   #port: /dev/cu.usbmodem4101
-  port: /dev/ttyACM0
+  port: COM16
   timeout: 5 # Seconds
 
 
@@ -13,4 +13,4 @@ bluetooth:
 # Joystick UUID mapping to number
 # TODO This will be updated by the driverstation
 joystick_mapping:
-  030000006d04000016c2000014040000: 0
+  030000005e040000ff02000000007200: 1

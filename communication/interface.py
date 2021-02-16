@@ -2,7 +2,7 @@
 class CommunicationBackend:
     # Communication backend Interface
 
-    def connect(self):
+    def connect_port(self):
         # Initialize the backend
         pass
 
@@ -10,7 +10,7 @@ class CommunicationBackend:
         # Indicate the port is open or bluetooth is connected
         pass
 
-    def disconnect(self):
+    def disconnect_port(self):
         # Disconnect from bluetooth or serial
         pass
 
@@ -21,4 +21,12 @@ class CommunicationBackend:
 
     def write(self, data: bytes):
         # Write data out via the backend
+        pass
+
+    def sent_bytes(self):
+        # The number of packets sent of the interface
+        pass
+
+    def rec_bytes(self):
+        # The number of packets received on the interface
         pass

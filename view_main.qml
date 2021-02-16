@@ -21,6 +21,11 @@ ApplicationWindow {
             // Odd hack to force our properties below to update
             // There should be a better way to do this
             connChanged++
+            lblConnDetails.text = "Bytes -- Sent: " + 0 + " Received: " + 0
+        }
+
+        function onConnectionDetailsChanged(sent, received) {
+            lblConnDetails.text = "Bytes -- Sent: " + sent + " Received: " + received
         }
     }
 
@@ -93,9 +98,10 @@ ApplicationWindow {
         height: 25
         RowLayout {
             Label {
-                text: "Sent: 0 Received: 0"
+                id: lblConnDetails
+                text: "Disconnected"
                 elide: Label.ElideRight
-                horizontalAlignment: Qt.AlignHRight
+                horizontalAlignment: Qt.AlignHCenter
                 verticalAlignment: Qt.AlignVCenter
                 Layout.fillWidth: true
             }

@@ -2,7 +2,7 @@ import sys
 from os.path import abspath, dirname, join
 
 from PySide6.QtQuick import QQuickView
-from PySide6.QtCore import QObject, Signal, Slot
+from PySide6.QtCore import QObject, Signal, Slot, QThread
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -11,10 +11,25 @@ from driver_station import DriverStation
 
 class ViewModelMain(QObject):
     connectionChanged = Signal(bool, arguments=['connected'])
+    connectionDetailsChanged = Signal(int, int, arguments=['sent', 'recieved'])
 
     def __init__(self, ds):
         self.ds = ds
+
+        # Communications Thread
+        self.thread = QThread()
+
+        # Connect Signals / Slots
+        # When the thread starts, run the run command
+        self.thread.started.connect(self.ds.run)
+
+        # If the worker ever finished, quit the thread and clean it up
+        self.ds.moveToThread(self.thread)
+        self.ds.finished.connect(self.thread.quit)
+        self.ds.comms_stats.connect(self.updateBytes)
+
         super().__init__()
+
 
     @Slot(result=str)
     def get_connection(self):
@@ -33,13 +48,22 @@ class ViewModelMain(QObject):
 
     @Slot()
     def connect(self):
-        ds.connect()
+        # Connect then start sending packets on success
+        if (ds.connect_port()):
+            if (not self.thread.isRunning()):
+                self.thread.start()
+            else:
+                self.logger.fatal("Cannot start connection thread, thread already started!")
         self.connectionChanged.emit(self.is_connected())
 
     @Slot()
     def disconnect(self):
-        ds.disconnect()
+        ds.stop()
+        ds.disconnect_port()
         self.connectionChanged.emit(self.is_connected())
+
+    def updateBytes(self, sent, received):
+        self.connectionDetailsChanged.emit(sent, received)
 
 
 if __name__ == "__main__":
@@ -62,4 +86,9 @@ if __name__ == "__main__":
     if not engine.rootObjects():
         sys.exit(-1)
 
-    sys.exit(app.exec_())
+    # Store the return and disconnect
+    ret = app.exec_()
+    ds.stop()
+    ds.disconnect_port()
+
+    sys.exit(ret)

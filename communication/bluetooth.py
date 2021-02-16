@@ -15,6 +15,9 @@ class BluetoothBackend(CommunicationBackend):
         logger.info("Using Bluetooth communication backend", config=config)
         # TODO
 
+        self._sent_bytes = 0
+        self._received_bytes = 0
+
     def connect(self):
         logger.info("Trying to setup bluetooth", port=self.port.port)
         # TODO
@@ -26,3 +29,9 @@ class BluetoothBackend(CommunicationBackend):
     def write(self, data: bytes):
         # TODO
         pass
+
+    def sent_bytes(self):
+        return self._sent_bytes
+
+    def rec_bytes(self):
+        return self._received_bytes
