@@ -28,6 +28,8 @@ class SerialBackend(CommunicationBackend):
 
     def connect(self):
         logger.info("Trying to open serial port", port=self.port.port)
+        self._sent_bytes = 0
+        self._received_bytes = 0
         self.port.open()
 
     def disconnect(self):

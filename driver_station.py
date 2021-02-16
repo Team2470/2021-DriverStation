@@ -9,7 +9,7 @@ import threading
 import structlog
 import log
 import protocol
-from PySide6.QtCore import QObject, Signal, QThread
+from PySide2.QtCore import QObject, Signal, QThread
 
 
 class DriverStation(QObject):

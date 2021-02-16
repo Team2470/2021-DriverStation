@@ -1,13 +1,12 @@
-import QtQuick 2.0
+import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
-import QtQuick.Window 2.12
 import QtQuick.Controls.Material 2.12
 
 ApplicationWindow {
     id: window
     width: 600
-    height: 150
+    height: 200
     visible: true
     title: "2021 TP Driver Station"
 
@@ -61,14 +60,14 @@ ApplicationWindow {
                 id: conLabel
                 Layout.alignment: Qt.AlignLeft
                 color: "black"
-                font.pointSize: 14
+                font.pointSize: 12
                 text: "Connection:"
             }
             Text {
                 id: conType
                 Layout.alignment: Qt.AlignLeft
                 color: "black"
-                font.pointSize: 14
+                font.pointSize: 12
                 text: con.get_connection()
             }
         }
@@ -82,6 +81,8 @@ ApplicationWindow {
                     id: btn_connect
                     text: connChanged, con.is_connected_text()
                     highlighted: true
+                    Layout.preferredWidth: 150
+                    Layout.preferredHeight: 50
                     Material.accent: connChanged, con.is_connected() ? Material.Green : Material.Red
                     onClicked: {
                         if (!con.is_connected()) {

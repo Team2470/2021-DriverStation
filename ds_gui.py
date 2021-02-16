@@ -1,10 +1,10 @@
 import sys
 from os.path import abspath, dirname, join
 
-from PySide6.QtQuick import QQuickView
-from PySide6.QtCore import QObject, Signal, Slot, QThread
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import QQmlApplicationEngine
+from PySide2.QtQuick import QQuickView
+from PySide2.QtCore import QObject, Signal, Slot, QThread
+from PySide2.QtGui import QGuiApplication
+from PySide2.QtQml import QQmlApplicationEngine
 
 from driver_station import DriverStation
 
@@ -67,6 +67,9 @@ class ViewModelMain(QObject):
 
 
 if __name__ == "__main__":
+    # Force Material Style for now, as it is easier to change button colors
+    # If there are objections to this, feel free to update it as fit
+    sys.argv += ['--style', 'material']
     app = QGuiApplication(sys.argv)
 
     ds = DriverStation()

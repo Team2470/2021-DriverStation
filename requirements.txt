@@ -2,8 +2,9 @@ bleak
 structlog
 pyserial
 pygame
-pyside6
+pyside2
 pyyaml
 colorama
 numpy
 suitcase
+pyinstaller
