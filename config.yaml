@@ -1,4 +1,4 @@
-communication_backend: serial
+communication_backend: bluetooth
 
 serial:
   baudrate: 57600
