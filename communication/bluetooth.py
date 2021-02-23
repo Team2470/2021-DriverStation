@@ -25,8 +25,10 @@ class BluetoothBackend(CommunicationBackend):
         logger.info("Using Bluetooth communication backend", config=config)
         self.loop = asyncio.get_event_loop()
         self.comm_thread = threading.Thread(target=self.run)
+        self._sent_bytes = 0
+        self._received_bytes = 0
 
-    def init(self):
+    def connect(self):
         logger.info("Starting comm thread")
         self.comm_thread.start()
 
@@ -84,6 +86,11 @@ class BluetoothBackend(CommunicationBackend):
         # TODO
         pass
 
+    def sent_bytes(self):
+        return self._sent_bytes
+
+    def rec_bytes(self):
+        return self._received_bytes
     async def write(self, data: bytes):
         logger.info("Writing Data", data = data)
         # await self.client.write_gatt_char(UUID_TX, bytearray("!j00000000000000008B\r\n", encoding='utf8'), False)
@@ -97,5 +104,4 @@ class BluetoothBackend(CommunicationBackend):
         print("Disconnected callback called!")
         # TODO Figure this out
         # disconnected_event.set()
-
 

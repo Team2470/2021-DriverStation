@@ -4,5 +4,10 @@ structlog
 colorama
 pyserial
 pygame
+pyside2
 pyyaml
+colorama
+numpy
+suitcase
+pyinstaller
 numpy
