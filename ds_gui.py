@@ -33,7 +33,7 @@ class ViewModelMain(QObject):
 
     @Slot(result=str)
     def get_connection(self):
-        return ds.config["communication_backend"]
+        return ds.config["communication_backend"] + "  [ " + ds.config["serial"]["port"] + " @ " + str(ds.config["serial"]["baudrate"]) + " ]"
 
     @Slot(result=bool)
     def is_connected(self):

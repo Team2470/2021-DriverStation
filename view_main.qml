@@ -5,7 +5,7 @@ import QtQuick.Controls.Material 2.12
 
 ApplicationWindow {
     id: window
-    width: 600
+    width: 700
     height: 200
     visible: true
     title: "2021 TP Driver Station"
@@ -60,14 +60,14 @@ ApplicationWindow {
                 id: conLabel
                 Layout.alignment: Qt.AlignLeft
                 color: "black"
-                font.pointSize: 12
+                font.pointSize: 10
                 text: "Connection:"
             }
             Text {
                 id: conType
                 Layout.alignment: Qt.AlignLeft
                 color: "black"
-                font.pointSize: 12
+                font.pointSize: 10
                 text: con.get_connection()
             }
         }
