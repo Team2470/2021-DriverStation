@@ -78,7 +78,7 @@ def run():
                     pkt.axis4 = joystick.axis[4]
                 if len(length) <= 6:
                     pkt.axis5 = joystick.axis[5]
-                # TODO lets do buttons later....
+                pkt.buttonWord = joystick.button_word()
 
                 p = pkt.pack()
                 #logger.info("Joystick1 packet", p=p)
@@ -103,7 +103,7 @@ def run():
                     pkt.axis4 = joystick.axis[4]
                 if len(length) <= 6:
                     pkt.axis5 = joystick.axis[5]
-                # TODO lets do buttons later....
+                pkt.buttonWord = joystick.button_word()
 
                 p = pkt.pack()
                 #logger.info("Joystick2 packet", p=p)

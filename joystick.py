@@ -45,6 +45,11 @@ class JoystickState:
             ret = -127
         return ret
 
+    def button_word(self):
+        word = 0
+        for buttonNum, pressed in enumerate(self.buttons):
+            word |= int(pressed) << buttonNum
+        return word
     # @staticmethod
     # def fix_hat(hat):
     #     x, y = hat
