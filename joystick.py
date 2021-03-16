@@ -43,7 +43,7 @@ class JoystickState:
             ret = 128
         elif ret < -127:
             ret = -127
-        return ret
+        return -ret
 
     # @staticmethod
     # def fix_hat(hat):

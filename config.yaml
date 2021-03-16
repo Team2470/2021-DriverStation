@@ -3,7 +3,7 @@ communication_backend: serial
 serial:
   baudrate: 57600
   #port: /dev/cu.usbmodem4101
-  port: /dev/ttyUSB0
+  port: /dev/ttyACM0
   timeout: 5 # Seconds
 
 

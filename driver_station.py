@@ -116,7 +116,7 @@ class DriverStation(QObject):
                 # TODO lets do buttons later....
 
                 p = pkt.pack()
-                self.logger.info("Joystick1 packet", p=p)
+                #self.logger.info("Joystick1 packet", p=p)
                 self.communication_backend.write(p)
 
             # Right now just the first joystick, figure out how to properly handle joysticks later...
@@ -134,7 +134,7 @@ class DriverStation(QObject):
                 # TODO lets do buttons later....
 
                 p = pkt.pack()
-                self.logger.info("Joystick2 packet", p=p)
+                #self.logger.info("Joystick2 packet", p=p)
                 self.communication_backend.write(p)
 
             # Update read/write
