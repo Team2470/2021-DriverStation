@@ -113,7 +113,11 @@ class DriverStation(QObject):
                 pkt.axis3 = joystick.axis[3]
                 pkt.axis4 = joystick.axis[4]
                 pkt.axis5 = joystick.axis[5]
-                # TODO lets do buttons later....
+
+                btn_cnt = min(len(joystick.buttons), 16)
+                pkt.buttonWord = 0
+                for idx in range(btn_cnt):
+                    pkt.buttonWord += (1 << idx) if (joystick.buttons[idx]) else 0
 
                 p = pkt.pack()
                 #self.logger.info("Joystick1 packet", p=p)
@@ -131,7 +135,11 @@ class DriverStation(QObject):
                 pkt.axis3 = joystick.axis[3]
                 pkt.axis4 = joystick.axis[4]
                 pkt.axis5 = joystick.axis[5]
-                # TODO lets do buttons later....
+
+                btn_cnt = min(len(joystick.buttons), 16)
+                pkt.buttonWord = 0
+                for idx in range(btn_cnt):
+                    pkt.buttonWord += (1 << idx) if (joystick.buttons[idx]) else 0
 
                 p = pkt.pack()
                 #self.logger.info("Joystick2 packet", p=p)
