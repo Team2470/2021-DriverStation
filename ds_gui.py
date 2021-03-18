@@ -30,7 +30,6 @@ class ViewModelMain(QObject):
 
         super().__init__()
 
-
     @Slot(result=str)
     def get_connection(self):
         return ds.config["communication_backend"] + "  [ " + ds.config["serial"]["port"] + " @ " + str(ds.config["serial"]["baudrate"]) + " ]"
@@ -45,6 +44,14 @@ class ViewModelMain(QObject):
             return "Disconnect"
         else:
             return "Connect"
+
+    @Slot(result=bool)
+    def is_enabled(self):
+        return ds.is_enabled()
+
+    @Slot(bool)
+    def set_enabled(self, enable):
+        ds.set_enabled(enable)
 
     @Slot()
     def connect(self):

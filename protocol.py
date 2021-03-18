@@ -150,8 +150,8 @@ class ProtocolFloat(BaseField):
 
 
 class Joystick1Packet(Structure):
-    start = Magic(bytearray("!", "utf8"))
-    type = Magic(bytearray("j", "utf8"))
+    start = Magic(bytearray(PACKET_START_CHAR, "utf8"))
+    type = Magic(bytearray(MSGID_DS_JOYSTICK_1, "utf8"))
 
     buttonWord = ProtocolUInt16()
     axis0 = ProtocolUInt8()
@@ -160,6 +160,38 @@ class Joystick1Packet(Structure):
     axis3 = ProtocolUInt8()
     axis4 = ProtocolUInt8()
     axis5 = ProtocolUInt8()
+
+    checksum = CRCField(ProtocolChecksum(), checksum, 0, -4)
+    termination = Magic(bytearray("\r\n", "utf8"))
+
+
+class Joystick2Packet(Structure):
+    start = Magic(bytearray(PACKET_START_CHAR, "utf8"))
+    type = Magic(bytearray(MSGID_DS_JOYSTICK_2, "utf8"))
+
+    buttonWord = ProtocolUInt16()
+    axis0 = ProtocolUInt8()
+    axis1 = ProtocolUInt8()
+    axis2 = ProtocolUInt8()
+    axis3 = ProtocolUInt8()
+    axis4 = ProtocolUInt8()
+    axis5 = ProtocolUInt8()
+
+    checksum = CRCField(ProtocolChecksum(), checksum, 0, -4)
+    termination = Magic(bytearray("\r\n", "utf8"))
+
+
+class ControlPacket(Structure):
+    start = Magic(bytearray(PACKET_START_CHAR, "utf8"))
+    type = Magic(bytearray(MSGID_DS_CONTROL, "utf8"))
+
+    # Bits 0>4 = Mode
+    # Bit 5 = enabled
+    # Bit 6 = estopped
+    controlByte = ProtocolUInt8()
+
+    # Software switches
+    switchByte = ProtocolUInt8()
 
     checksum = CRCField(ProtocolChecksum(), checksum, 0, -4)
     termination = Magic(bytearray("\r\n", "utf8"))

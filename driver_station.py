@@ -20,6 +20,7 @@ class DriverStation(QObject):
 
     running = False
     communication_backend = None
+    enabled = False
 
     def __init__(self):
         # Setup logging
@@ -64,11 +65,17 @@ class DriverStation(QObject):
             self.logger.fatal("Unable to close serial port:" + str(e))
             return False
 
+    def set_enabled(self, enable):
+        self.enabled = enable
+
     def is_connected(self):
         if self.communication_backend is not None:
             return self.communication_backend.is_connected()
         else:
             return False
+
+    def is_enabled(self):
+        return self.enabled
 
     def stop(self):
         self.running = False
@@ -99,7 +106,14 @@ class DriverStation(QObject):
             self.joystick_manager.loop()
 
             # Control packet
-            # TODO
+            pkt = protocol.ControlPacket()
+
+            # For now, just set enabled
+            pkt.controlByte = 0
+            pkt.controlByte += (1 << 4) if self.enabled else 0x00
+            p = pkt.pack()
+            #self.logger.info("Control packet", p=p)
+            self.communication_backend.write(p)
 
             # Right now just the first joystick, figure out how to properly handle joysticks later...
             if 1 in self.joystick_manager.joysticks:
@@ -148,6 +162,6 @@ class DriverStation(QObject):
             # Update read/write
             self.comms_stats.emit(self.communication_backend.sent_bytes(), self.communication_backend.rec_bytes())
 
-            time.sleep(0.02)
+            time.sleep(0.05)
 
         self.finished.emit()

@@ -5,7 +5,7 @@ import QtQuick.Controls.Material 2.12
 
 ApplicationWindow {
     id: window
-    width: 700
+    width: 900
     height: 200
     visible: true
     title: "2021 TP Driver Station"
@@ -56,6 +56,22 @@ ApplicationWindow {
             spacing: 20
             Layout.leftMargin: 10
 
+            Button {
+                    id: btn_connect
+                    text: connChanged, con.is_connected_text()
+                    highlighted: true
+                    Layout.preferredWidth: 150
+                    Layout.preferredHeight: 50
+                    Material.accent: connChanged, con.is_connected() ? Material.Blue : Material.Grey
+                    onClicked: {
+                        if (!con.is_connected()) {
+                            con.connect()
+                        } else {
+                            con.disconnect()
+                        }
+                    }
+            }
+
             Text {
                 id: conLabel
                 Layout.alignment: Qt.AlignLeft
@@ -73,23 +89,38 @@ ApplicationWindow {
         }
 
         RowLayout {
-            spacing: 20
-            Layout.preferredWidth: 400
             Layout.leftMargin: 10
 
             Button {
-                    id: btn_connect
-                    text: connChanged, con.is_connected_text()
-                    highlighted: true
+                    id: btn_enable
+                    text: "Enable"
+                    padding: 0
+                    spacing: 0
+                    highlighted: con.is_enabled()
                     Layout.preferredWidth: 150
                     Layout.preferredHeight: 50
-                    Material.accent: connChanged, con.is_connected() ? Material.Green : Material.Red
+                    Material.accent: Material.Green
+                    Material.theme: Material.Light
                     onClicked: {
-                        if (!con.is_connected()) {
-                            con.connect()
-                        } else {
-                            con.disconnect()
-                        }
+                        con.set_enabled(true)
+                        btn_enable.highlighted = con.is_enabled();
+                        btn_disable.highlighted = !con.is_enabled();
+                    }
+            }
+
+            Button {
+                    id: btn_disable
+                    text: "Disable"
+                    padding: 0
+                    spacing: 0
+                    highlighted: !con.is_enabled()
+                    Layout.preferredWidth: 150
+                    Layout.preferredHeight: 50
+                    Material.accent: Material.Red
+                    onClicked: {
+                        con.set_enabled(false)
+                        btn_enable.highlighted = con.is_enabled();
+                        btn_disable.highlighted = !con.is_enabled();
                     }
             }
         }
