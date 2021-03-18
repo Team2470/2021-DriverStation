@@ -121,17 +121,20 @@ class DriverStation(QObject):
 
                 # Build up the joystick 1 packet
                 pkt = protocol.Joystick1Packet()
-                pkt.axis0 = joystick.axis[0]
-                pkt.axis1 = joystick.axis[1]
-                pkt.axis2 = joystick.axis[2]
-                pkt.axis3 = joystick.axis[3]
-                pkt.axis4 = joystick.axis[4]
-                pkt.axis5 = joystick.axis[5]
-
-                btn_cnt = min(len(joystick.buttons), 16)
-                pkt.buttonWord = 0
-                for idx in range(btn_cnt):
-                    pkt.buttonWord += (1 << idx) if (joystick.buttons[idx]) else 0
+                length = len(joystick.axis)
+                if length >= 1:
+                    pkt.axis0 = joystick.axis[0]
+                if length >= 2:
+                    pkt.axis1 = joystick.axis[1]
+                if length >= 3:
+                    pkt.axis2 = joystick.axis[2]
+                if length >= 4:
+                    pkt.axis3 = joystick.axis[3]
+                if length >= 5:
+                    pkt.axis4 = joystick.axis[4]
+                if length >= 6:
+                    pkt.axis5 = joystick.axis[5]
+                pkt.buttonWord = joystick.button_word()
 
                 p = pkt.pack()
                 #self.logger.info("Joystick1 packet", p=p)
@@ -143,17 +146,20 @@ class DriverStation(QObject):
 
                 # Build up the joystick 1 packet
                 pkt = protocol.Joystick2Packet()
-                pkt.axis0 = joystick.axis[0]
-                pkt.axis1 = joystick.axis[1]
-                pkt.axis2 = joystick.axis[2]
-                pkt.axis3 = joystick.axis[3]
-                pkt.axis4 = joystick.axis[4]
-                pkt.axis5 = joystick.axis[5]
-
-                btn_cnt = min(len(joystick.buttons), 16)
-                pkt.buttonWord = 0
-                for idx in range(btn_cnt):
-                    pkt.buttonWord += (1 << idx) if (joystick.buttons[idx]) else 0
+                length = len(joystick.axis)
+                if length >= 1:
+                    pkt.axis0 = joystick.axis[0]
+                if length >= 2:
+                    pkt.axis1 = joystick.axis[1]
+                if length >= 3:
+                    pkt.axis2 = joystick.axis[2]
+                if length >= 4:
+                    pkt.axis3 = joystick.axis[3]
+                if length >= 5:
+                    pkt.axis4 = joystick.axis[4]
+                if length >= 6:
+                    pkt.axis5 = joystick.axis[5]
+                pkt.buttonWord = joystick.button_word()
 
                 p = pkt.pack()
                 #self.logger.info("Joystick2 packet", p=p)
