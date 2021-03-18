@@ -11,3 +11,4 @@ numpy
 suitcase
 pyinstaller
 numpy
+pytest
