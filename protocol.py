@@ -68,7 +68,7 @@ class ProtocolUInt16(BaseField):
 
     def pack(self, stream):
         if self._value is not None:
-            stream.write("%04X" % np.uint16(self._value))
+            stream.write(("%04X" % np.uint16(self._value)).encode("utf8"))
         else:
             stream.write("0000".encode("utf8"))
 
@@ -84,7 +84,7 @@ class ProtocolSInt16(BaseField):
 
     def pack(self, stream):
         if self._value is not None:
-            stream.write("%04X" % np.uint16(self._value))
+            stream.write(("%04X" % np.uint16(self._value)).encode("utf8"))
         else:
             stream.write("0000")
 
@@ -106,6 +106,7 @@ class ProtocolUInt8(BaseField):
 
     def unpack(self, data):
         self._value = np.int8(int(data, 16))  # TODO is this right?
+
 
 class ProtocolSInt8(BaseField):
     def __init__(self, **kwargs):
