@@ -103,8 +103,6 @@ class DriverStation(QObject):
     def _main_loop(self):
         self.logger.info("Starting main loop...")
         while self.running:
-            self.joystick_manager.loop()
-
             # Control packet
             pkt = protocol.ControlPacket()
 

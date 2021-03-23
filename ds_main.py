@@ -9,7 +9,6 @@ import sys
 import threading
 import structlog
 import log
-import protocol
 
 # Setup logging
 log.setup()
@@ -54,60 +53,12 @@ def run():
     def main_loop():
         logger.info("Starting main loop...")
         while running:
-            joystick_manager.loop()
-
-            # Control packet
-            # TODO
-
-            # Right now just the first joystick, figure out how to properly handle joysticks later...
             if 1 in joystick_manager.joysticks:
                 joystick = joystick_manager.joysticks[1]
-
-                # Build up the joystick 1 packet
-                pkt = protocol.Joystick1Packet()
-                length = joystick.axis
-                if len(length) <= 1:
-                    pkt.axis0 = joystick.axis[0]
-                if len(length) <= 2:
-                    pkt.axis1 = joystick.axis[1]
-                if len(length) <= 3:
-                    pkt.axis2 = joystick.axis[2]
-                if len(length) <= 4:
-                    pkt.axis3 = joystick.axis[3]
-                if len(length) <= 5:
-                    pkt.axis4 = joystick.axis[4]
-                if len(length) <= 6:
-                    pkt.axis5 = joystick.axis[5]
-                pkt.buttonWord = joystick.button_word()
-
-                p = pkt.pack()
-                #logger.info("Joystick1 packet", p=p)
-                communication_backend.write(p)
-
-            # Right now just the first joystick, figure out how to properly handle joysticks later...
+                communication_backend.write(joystick.get_joystick_1_pkt())
             if 2 in joystick_manager.joysticks:
-                joystick = joystick_manager.joysticks[2]
-
-                # Build up the joystick 1 packet
-                pkt = protocol.Joystick2Packet()
-                length = joystick.axis
-                if len(length) <= 1:
-                    pkt.axis0 = joystick.axis[0]
-                if len(length) <= 2:
-                    pkt.axis1 = joystick.axis[1]
-                if len(length) <= 3:
-                    pkt.axis2 = joystick.axis[2]
-                if len(length) <= 4:
-                    pkt.axis3 = joystick.axis[3]
-                if len(length) <= 5:
-                    pkt.axis4 = joystick.axis[4]
-                if len(length) <= 6:
-                    pkt.axis5 = joystick.axis[5]
-                pkt.buttonWord = joystick.button_word()
-
-                p = pkt.pack()
-                #logger.info("Joystick2 packet", p=p)
-                communication_backend.write(p)
+                joystick = joystick_manager.joysticks[1]
+                communication_backend.write(joystick.get_joystick_2_pkt())
 
             time.sleep(0.02)
 
