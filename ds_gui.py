@@ -2,11 +2,13 @@ import sys
 from os.path import abspath, dirname, join
 
 from PySide2.QtQuick import QQuickView
-from PySide2.QtCore import QObject, Signal, Slot, QThread
+from PySide2.QtCore import QObject, Signal, Slot, QThread, QTimer
 from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine
 
 from driver_station import DriverStation
+
+import structlog
 
 
 class ViewModelMain(QObject):
@@ -14,7 +16,13 @@ class ViewModelMain(QObject):
     connectionDetailsChanged = Signal(int, int, arguments=['sent', 'recieved'])
 
     def __init__(self, ds):
+        self.logger = structlog.get_logger()
         self.ds = ds
+
+        # Joystick manager task
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.joystick_manager_tick)
+        self.timer.start(20)  # Poll at 50 HZ
 
         # Communications Thread
         self.thread = QThread()
@@ -59,6 +67,7 @@ class ViewModelMain(QObject):
         if (ds.connect_port()):
             if (not self.thread.isRunning()):
                 self.thread.start()
+                pass
             else:
                 self.logger.fatal("Cannot start connection thread, thread already started!")
         self.connectionChanged.emit(self.is_connected())
@@ -71,6 +80,11 @@ class ViewModelMain(QObject):
 
     def updateBytes(self, sent, received):
         self.connectionDetailsChanged.emit(sent, received)
+
+    def joystick_manager_tick(self):
+        # self.logger.info("Joystick manager tick!")
+        self.ds.joystick_manager.loop()
+        self.timer.start(20) # 50 Hz
 
 
 if __name__ == "__main__":
