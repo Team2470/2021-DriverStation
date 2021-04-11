@@ -3,8 +3,9 @@ communication_backend: bluetooth
 
 logging:
   global_level: DEBUG
-  serial_level: DEBUG
-  bluetooth_level: DEBUG
+  driver_station: INFO
+  serial_level: INFO
+  bluetooth_level: INFO
   bleak_level: INFO
 
 serial:

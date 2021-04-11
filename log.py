@@ -28,12 +28,15 @@ def setup(config):
     ]
 
     global_log_level = "DEBUG"
+    driver_station_log_level = "INFO"
     serial_log_level = "DEBUG"
     bluetooth_log_level = "DEBUG"
     bleak_log_level = "INFO"
 
     if "global_level" in config:
         global_log_level = config["global_level"]
+    if "driver_station" in config:
+        driver_station_log_level = config["driver_station"]
     if "serial_level" in config:
         serial_log_level = config["serial_level"]
     if "bluetooth_level" in config:
@@ -94,6 +97,12 @@ def setup(config):
                     # "handlers": ["default"],
                     "handlers": ["default", "file"],
                     "level": bleak_log_level,
+                    "propagate": True,
+                },
+                "driver_station": {
+                    # "handlers": ["default"],
+                    "handlers": ["default", "file"],
+                    "level": driver_station_log_level,
                     "propagate": True,
                 }
             }

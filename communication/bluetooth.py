@@ -99,6 +99,18 @@ class BluetoothBackend(CommunicationBackend):
         with self.lock:
             return self.bytes_rx
 
+    def uart_data_received(self, sender, data):
+        print( "RX> {0}".format(data))
+
+        self.bytes_rx += len(data)
+        if len(data) == 0:
+            logger.warn("Empty response")
+            return
+
+        # TODO this data needs to get piped somewhere better, so the logout is not
+        # horrible
+        logger.info("Arduino:", data=str(data))
+
     async def run_comms(self, loop):
         def disconnected_callback(client):
             logger.warn("Bluetooth disconnected callback called!")
@@ -111,6 +123,11 @@ class BluetoothBackend(CommunicationBackend):
                 running = self.running
                 self.comm_state = CommunicationState.CONNECTED
 
+
+            # Start receiver
+            await client.start_notify(UUID_RX, self.uart_data_received)
+
+            # Send commands
             while running:
                 try:
                     cmd = self.cmd_queue.get(timeout=1) # Block for up to 1 second
