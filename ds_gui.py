@@ -15,6 +15,7 @@ import structlog
 class ViewModelMain(QObject):
     connectionChanged = Signal(bool, arguments=['connected'])
     connectionDetailsChanged = Signal(str, int, int, arguments=['comm_state', 'sent', 'recieved'])
+    connectionJoysticksChanged = Signal(str, str, arguments=['joystick_1_summary', 'joystick_2_summary'])
 
     def __init__(self, ds):
         self.logger = structlog.get_logger()
@@ -97,6 +98,18 @@ class ViewModelMain(QObject):
         # self.logger.info("Joystick manager tick!", comm_state=self.ds.get_comm_state_str())
         self.connectionChanged.emit(self.is_connected() or self.is_connecting())
         self.ds.joystick_manager.loop()
+
+        # Generate strings for GUI
+        j1_summary = "Not Connected"
+        if 1 in self.ds.joystick_manager.joysticks:
+            j1_summary = self.ds.joystick_manager.joysticks[1].get_summary()
+
+        j2_summary = "Not Connected"
+        if 2 in self.ds.joystick_manager.joysticks:
+            j2_summary = self.ds.joystick_manager.joysticks[2].get_summary()
+
+        self.connectionJoysticksChanged.emit(j1_summary, j2_summary)
+
         self.timer.start(20) # 50 Hz
 
 

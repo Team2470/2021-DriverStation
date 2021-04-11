@@ -55,6 +55,28 @@ class JoystickState:
     #     x, y = hat
     #     if x = 0
 
+    def get_summary(self) -> str:
+        axis_string = "Axis 0: {:.2f} 1: {:.2f} 2: {:.2f} 3: {:.2f} 4: {:.2f} 5: {:.2f}".format(
+            self.axis[0] if len(self.buttons) <= 1 else 0,
+            self.axis[1] if len(self.buttons) <= 2 else 0,
+            self.axis[2] if len(self.buttons) <= 3 else 0,
+            self.axis[3] if len(self.buttons) <= 4 else 0,
+            self.axis[4] if len(self.buttons) <= 5 else 0,
+            self.axis[5] if len(self.buttons) <= 6 else 0,
+        )
+
+        pressed_buttons = []
+        for buttonNum, pressed in enumerate(self.buttons):
+            if pressed:
+                pressed_buttons.append(buttonNum)
+        if len(pressed_buttons) == 0:
+            pressed_buttons.append("None")
+
+        button_string = "Buttons: " + " ".join(pressed_buttons)
+
+        return axis_string + "; " + button_string
+
+
     def get_joystick_1_pkt(self):
         # Build up the joystick 1 packet
         pkt = protocol.Joystick1Packet()

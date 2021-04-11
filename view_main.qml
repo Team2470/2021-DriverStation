@@ -6,7 +6,7 @@ import QtQuick.Controls.Material 2.12
 ApplicationWindow {
     id: window
     width: 900
-    height: 200
+    height: 250
     visible: true
     title: "2021 TP Driver Station"
 
@@ -25,6 +25,11 @@ ApplicationWindow {
 
         function onConnectionDetailsChanged(comm_state, sent, received) {
             lblConnDetails.text = "Communication State: " + comm_state + " Bytes -- Sent: " + sent + " Received: " + received
+        }
+
+        function onConnectionJoysticksChanged(joystick_1_summary, joystick_2_summary) {
+            joystick1Values.text = joystick_1_summary
+            joystick2Values.text = joystick_2_summary
         }
     }
 
@@ -49,7 +54,7 @@ ApplicationWindow {
     GridLayout {
         id: grid
         columns: 1
-        rows: 2
+        rows: 5
 
 
         RowLayout {
@@ -124,6 +129,66 @@ ApplicationWindow {
                     }
             }
         }
+
+        RowLayout {
+            Layout.leftMargin: 10
+
+            Text {
+                id: joystickCountLabel
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Joystick Count:"
+            }
+            Text {
+                id: joystickCount
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "0"
+            }
+        }
+
+        RowLayout {
+            spacing: 20
+            Layout.leftMargin: 10
+
+            Text {
+                id: joystick1Label
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Joystick 1 State:"
+            }
+            Text {
+                id: joystick1Values
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Unknown"
+            }
+        }
+
+        RowLayout {
+            spacing: 20
+            Layout.leftMargin: 10
+
+            Text {
+                id: joystick2Label
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Joystick 2 State:"
+            }
+            Text {
+                id: joystick2Values
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Unknown"
+            }
+        }
+
     }
 
     footer: ToolBar {
