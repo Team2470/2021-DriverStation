@@ -20,11 +20,11 @@ ApplicationWindow {
             // Odd hack to force our properties below to update
             // There should be a better way to do this
             connChanged++
-            lblConnDetails.text = "Bytes -- Sent: " + 0 + " Received: " + 0
+            // lblConnDetails.text = "Communication State: UNKNOWN Bytes -- Sent: " + 0 + " Received: " + 0
         }
 
-        function onConnectionDetailsChanged(sent, received) {
-            lblConnDetails.text = "Bytes -- Sent: " + sent + " Received: " + received
+        function onConnectionDetailsChanged(comm_state, sent, received) {
+            lblConnDetails.text = "Communication State: " + comm_state + " Bytes -- Sent: " + sent + " Received: " + received
         }
     }
 
@@ -64,10 +64,10 @@ ApplicationWindow {
                     Layout.preferredHeight: 50
                     Material.accent: connChanged, con.is_connected() ? Material.Blue : Material.Grey
                     onClicked: {
-                        if (!con.is_connected()) {
-                            con.connect()
-                        } else {
+                        if (con.is_connected() || con.is_connecting()) {
                             con.disconnect()
+                        } else {
+                            con.connect()
                         }
                     }
             }

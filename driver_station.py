@@ -1,8 +1,8 @@
-#/usr/bin/env python3
+#! /usr/bin/env python3
 
 import yaml
 from joystick import JoystickManager
-from communication import SerialBackend, BluetoothBackend
+from communication import SerialBackend, BluetoothBackend, CommunicationState
 from serial.serialutil import PortNotOpenError
 import time
 import threading
@@ -16,7 +16,7 @@ class DriverStation(QObject):
 
     # QT Callbacks
     finished = Signal()
-    comms_stats = Signal(int, int)
+    comms_stats = Signal(str, int, int)
 
     running = False
     communication_backend = None
@@ -25,13 +25,14 @@ class DriverStation(QObject):
     def __init__(self):
         # Setup logging
         super().__init__()
-        log.setup()
         self.logger = structlog.get_logger()
         self.config = {}
 
     def load_settings(self, file_path):
         with open("config.yaml", 'r') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
+
+        log.setup(self.config["logging"])
 
         # Communication backend
         communication_backend_name = self.config["communication_backend"]
@@ -68,11 +69,19 @@ class DriverStation(QObject):
     def set_enabled(self, enable):
         self.enabled = enable
 
-    def is_connected(self):
-        if self.communication_backend is not None:
-            return self.communication_backend.is_connected()
+    def get_comm_state(self) -> CommunicationState:
+        return self.communication_backend.get_comm_state()
+
+    def get_comm_state_str(self) -> str:
+        state = self.communication_backend.get_comm_state()
+        if state == CommunicationState.CONNECTED:
+            return "Connected"
+        elif state == CommunicationState.CONNECTING:
+            return "Connecting"
+        elif state == CommunicationState.DISCONNECTED:
+            return "Disconnected"
         else:
-            return False
+            return "Unknown"
 
     def is_enabled(self):
         return self.enabled
@@ -102,7 +111,7 @@ class DriverStation(QObject):
 
     def _main_loop(self):
         self.logger.info("Starting main loop...")
-        while self.running and self.communication_backend.is_connected():
+        while self.running:
             # Control packet
             pkt = protocol.ControlPacket()
 
@@ -111,6 +120,7 @@ class DriverStation(QObject):
             pkt.controlByte += (1 << 4) if self.enabled else 0x00
             p = pkt.pack()
             #self.logger.info("Control packet", p=p)
+            self.logger.debug("Sending control packet", p=p)
             self.communication_backend.write(p)
 
             # Right now just the first joystick, figure out how to properly handle joysticks later...
@@ -135,7 +145,7 @@ class DriverStation(QObject):
                 pkt.buttonWord = joystick.button_word()
 
                 p = pkt.pack()
-                #self.logger.info("Joystick1 packet", p=p)
+                self.logger.debug("Sending joystick1 packet", p=p)
                 self.communication_backend.write(p)
 
             # Right now just the first joystick, figure out how to properly handle joysticks later...
@@ -160,12 +170,18 @@ class DriverStation(QObject):
                 pkt.buttonWord = joystick.button_word()
 
                 p = pkt.pack()
-                #self.logger.info("Joystick2 packet", p=p)
+                self.logger.debug("Sending joystick2 packet", p=p)
                 self.communication_backend.write(p)
 
             # Update read/write
-            self.comms_stats.emit(self.communication_backend.sent_bytes(), self.communication_backend.rec_bytes())
+            comm_state_str = self.get_comm_state_str()
+            sent_bytes = self.communication_backend.sent_bytes()
+            rec_bytes = self.communication_backend.rec_bytes()
+
+            self.logger.debug("Updating comm stats", comm_state=comm_state_str, sent_bytes=sent_bytes, rec_bytes=rec_bytes)
+            self.comms_stats.emit(comm_state_str, sent_bytes, rec_bytes)
 
             time.sleep(0.05)
 
+        self.logger.warn("Main loop ending")
         self.finished.emit()

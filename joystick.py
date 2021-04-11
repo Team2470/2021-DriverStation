@@ -4,7 +4,6 @@ import structlog
 import protocol
 
 # Setup logging
-log.setup()
 logger = structlog.get_logger()
 
 

@@ -7,6 +7,7 @@ import asyncio
 from bleak import BleakScanner, BleakClient, BleakError
 from threading import Thread, Lock
 from queue import Queue, Empty, Full
+import time
 
 # Setup logging
 # log.setup()
@@ -43,8 +44,10 @@ class BluetoothBackend(CommunicationBackend):
 
         self.cmd_queue = Queue(maxsize=50)
         def start():
-           while self.running:
+            while self.running:
                 # Continuously connect to the bluetooth module
+                with self.lock:
+                    self.comm_state = CommunicationState.CONNECTING
                 logger.info("Connecting...", mac_address=self.mac_address)
 
                 try:
@@ -58,8 +61,9 @@ class BluetoothBackend(CommunicationBackend):
                     logger.warning("Error in comm loop", e=e)
                 finally:
                     logger.warn("Communication attempt ended")
-                    with self.lock:
-                        self.connected = False
+
+            self.comm_state = CommunicationState.DISCONNECTED
+
 
         # Start Asysnc communication thread
         self.comm_thread = Thread(target=start)
@@ -78,7 +82,10 @@ class BluetoothBackend(CommunicationBackend):
         pass
 
     def write(self, data: bytes):
-        # Write packet to Bluetooth module
+        # Write packet to Bluetooth module, if we are connected
+        if self.get_comm_state() != CommunicationState.CONNECTED:
+            return
+
         try:
             self.cmd_queue.put(data, block=False)
         except Full:

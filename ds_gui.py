@@ -7,13 +7,14 @@ from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine
 
 from driver_station import DriverStation
+from communication import CommunicationState
 
 import structlog
 
 
 class ViewModelMain(QObject):
     connectionChanged = Signal(bool, arguments=['connected'])
-    connectionDetailsChanged = Signal(int, int, arguments=['sent', 'recieved'])
+    connectionDetailsChanged = Signal(str, int, int, arguments=['comm_state', 'sent', 'recieved'])
 
     def __init__(self, ds):
         self.logger = structlog.get_logger()
@@ -39,39 +40,49 @@ class ViewModelMain(QObject):
         super().__init__()
 
     @Slot(result=str)
-    def get_connection(self):
-        return ds.config["communication_backend"] + "  [ " + ds.config["serial"]["port"] + " @ " + str(ds.config["serial"]["baudrate"]) + " ]"
+    def get_connection(self) -> str:
+        connection_str = "unknown"
+        if ds.config["communication_backend"] == "serial":
+            connection_str = ds.config["serial"]["port"] + " @ " + str(ds.config["serial"]["baudrate"])
+        elif ds.config["communication_backend"] == "bluetooth":
+            connection_str = "MAC Address " + ds.config["bluetooth"]["mac_address"]
+
+        return ds.config["communication_backend"] + "  [ " + connection_str + " ]"
 
     @Slot(result=bool)
-    def is_connected(self):
-        print(ds.is_connected())
-        return ds.is_connected()
+    def is_connected(self) -> bool:
+        return ds.get_comm_state() == CommunicationState.CONNECTED
+
+    @Slot(result=bool)
+    def is_connecting(self) -> bool:
+        return ds.get_comm_state() == CommunicationState.CONNECTING
 
     @Slot(result=str)
-    def is_connected_text(self):
+    def is_connected_text(self) -> str:
         if self.is_connected():
             return "Disconnect"
+        elif self.is_connecting():
+            return "Connecting"
         else:
             return "Connect"
 
     @Slot(result=bool)
-    def is_enabled(self):
+    def is_enabled(self) -> bool:
         return ds.is_enabled()
 
     @Slot(bool)
-    def set_enabled(self, enable):
+    def set_enabled(self, enable: bool):
         ds.set_enabled(enable)
 
     @Slot()
     def connect(self):
         # Connect then start sending packets on success
-        if (ds.connect_port()):
-            if (not self.thread.isRunning()):
+        if ds.connect_port():
+            if not self.thread.isRunning():
                 self.thread.start()
                 pass
             else:
                 self.logger.fatal("Cannot start connection thread, thread already started!")
-        self.connectionChanged.emit(self.is_connected())
 
     @Slot()
     def disconnect(self):
@@ -79,11 +90,12 @@ class ViewModelMain(QObject):
         ds.disconnect_port()
         self.connectionChanged.emit(self.is_connected())
 
-    def updateBytes(self, sent, received):
-        self.connectionDetailsChanged.emit(sent, received)
+    def updateBytes(self, comm_state: str, sent: int, received: int):
+        self.connectionDetailsChanged.emit(comm_state, sent, received)
 
     def joystick_manager_tick(self):
-        # self.logger.info("Joystick manager tick!")
+        # self.logger.info("Joystick manager tick!", comm_state=self.ds.get_comm_state_str())
+        self.connectionChanged.emit(self.is_connected() or self.is_connecting())
         self.ds.joystick_manager.loop()
         self.timer.start(20) # 50 Hz
 
