@@ -4,104 +4,106 @@ import log
 import structlog
 import asyncio
 from bleak import BleakScanner, BleakClient, BleakError
-import threading
+from threading import Thread, Lock
+from queue import Queue, Empty, Full
 
 # Setup logging
-log.setup()
+# log.setup()
 logger = structlog.get_logger()
 
 # UUIDs for the Elagoo Bluetooth module
 UUID_TX = "0000ffe2-0000-1000-8000-00805f9b34fb"
 UUID_RX = "0000ffe1-0000-1000-8000-00805f9b34fb"
 
-# macOS uses a UUID thing instead of a the modules mac address
-address = "74B1AEEB-6720-4DCB-94BC-623775EA3529"
-
 class BluetoothBackend(CommunicationBackend):
-    # Serial port communication backend
-    # TODO Add support for serial ports that come and go...
+    # Bluetooth port communication backend
 
     def __init__(self, config):
         logger.info("Using Bluetooth communication backend", config=config)
-        self.loop = asyncio.get_event_loop()
-        self.comm_thread = threading.Thread(target=self.run)
-        self._sent_bytes = 0
-        self._received_bytes = 0
+
+        self.lock = Lock()
+        self.cmd_queue = None
+        self.comm_thread = None
+
+        self.bytes_tx = 0
+        self.bytes_rx = 0
+        self.running = False
+        self.connected = False
+        self.mac_address = config["mac_address"]
 
     def connect(self):
-        logger.info("Starting comm thread")
+        self.cmd_queue = Queue(maxsize=50)
+        def start():
+            with self.lock:
+                self.running = True
+                self.connected = False
+
+            try:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(self.run_comms(loop))
+            except Exception as e:
+                logger.warning("Error in comm loop", e=e)
+            finally:
+                with self.lock:
+                    print("Updating")
+                    self.running = False
+                    self.connected = False
+
+        # Start Asysnc communication thread
+        self.comm_thread = Thread(target=start)
         self.comm_thread.start()
 
-    def run(self):
-        self.loop.run_until_complete(self.discover_and_wait())
-        self.loop.run_until_complete(self.comm_loop())
+    def disconnect(self):
+        # Set flag to stop communication thread
+        self.running = False
 
-    # Discover available devices, and wait for our module
-    async def discover_and_wait(self):
-        device_found = False
-        while not device_found:
-            print("Scanning for device...")
-            devices = await BleakScanner.discover()
-            for d in devices:
-                print("Address:", d.address, "Name:", d.name)
-                if d.address == address:
-                    print("Device found!")
-                    device_found = True
-                    break
-
-    async def comm_loop(self):
-        # TODO need to handling the modules coming and going
-
-        disconnected_event = asyncio.Event()
-
-        def disconnected_callback(client):
-            print("Disconnected callback called!")
-            disconnected_event.set()
-
-        async with BleakClient(address, loop=self.loop, disconnected_callback=disconnected_callback) as client:
-            print("Connected")
-
-            # print("Starting notify callback")
-            # await client.start_notify(UUID_NORDIC_RX, uart_data_received)
-
-            while True: # TODO do not send data if we disconnected
-                print("Sending command")
-                # await client.write_gatt_char(UUID_NORDIC_TX, bytearray("!c200046\r\n", encoding='utf8'), False)
-                await client.write_gatt_char(UUID_TX, bytearray("!j00000000000000008B\r\n", encoding='utf8'),
-                                             False)
-                await asyncio.sleep(0.02) # Send at a rate of 50Hz
-
-            print("Sleeping until device disconnects...")
-            await disconnected_event.wait()
-            print("Connected: {0}".format(await client.is_connected()))
-
-            print("Ending...")
-            # await client.stop_notify(UUID_NORDIC_RX)
-
-            await asyncio.sleep(
-                0.5
-            )  # Sleep a bit longer to allow _cleanup to remove all BlueZ notifications nicely...
+    def is_connected(self):
+        with self.lock:
+            return self.connected
 
     def read(self):
-        # TODO
+        # For now lets not read from the bluetooth module
         pass
 
+    def write(self, data: bytes):
+        # Write packet to Bluetooth module
+        try:
+            self.cmd_queue.put(data, block=False)
+        except Full:
+            logger.warning("Command queue is full")
+
     def sent_bytes(self):
-        return self._sent_bytes
+        with self.lock:
+            return self.bytes_tx
 
     def rec_bytes(self):
-        return self._received_bytes
-    async def write(self, data: bytes):
-        logger.info("Writing Data", data = data)
-        # await self.client.write_gatt_char(UUID_TX, bytearray("!j00000000000000008B\r\n", encoding='utf8'), False)
+        with self.lock:
+            return self.bytes_rx
 
-    # async def uart_data_received(sender, data):
-    #     # TODO needs to be plumbed in
-    #     logger.debug("RX", data=data)
-    #     # TODO Pipe this output to somewhere
+    async def run_comms(self, loop):
+        def disconnected_callback(client):
+            logger.warn("Bluetooth disconnected callback called!")
+            with self.lock:
+                # self.connected = False
+                # self.running = False
+                pass
 
-    def disconnected_callback(self):
-        print("Disconnected callback called!")
-        # TODO Figure this out
-        # disconnected_event.set()
+        self.connected = True
+        async with BleakClient(self.mac_address, loop=loop, disconnected_callback=disconnected_callback) as client:
+            running = self.running
 
+            while running:
+                try:
+                    cmd = self.cmd_queue.get(timeout=1) # Block for up to 1 second
+                    with self.lock:
+                        self.bytes_tx += len(cmd)
+                    logger.debug("Received packet", cmd=cmd)
+
+                    await client.write_gatt_char(UUID_TX, cmd, False)
+                    await asyncio.sleep(0.01) # TODO remove, this is probably not needed
+                except Empty:
+                    logger.debug("No command packet is available")
+
+                with self.lock:
+                    running = self.running

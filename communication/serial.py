@@ -5,7 +5,7 @@ import log
 import structlog
 
 # Setup logging
-log.setup()
+# log.setup()
 logger = structlog.get_logger()
 
 

@@ -44,6 +44,7 @@ class ViewModelMain(QObject):
 
     @Slot(result=bool)
     def is_connected(self):
+        print(ds.is_connected())
         return ds.is_connected()
 
     @Slot(result=str)

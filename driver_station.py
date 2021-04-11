@@ -102,7 +102,7 @@ class DriverStation(QObject):
 
     def _main_loop(self):
         self.logger.info("Starting main loop...")
-        while self.running:
+        while self.running and self.communication_backend.is_connected():
             # Control packet
             pkt = protocol.ControlPacket()
 

@@ -1,3 +1,10 @@
+from enum import Enum
+
+class CommunicationState(Enum):
+    DISCONNECTED = 1
+    CONNECTING = 2
+    CONNECTED = 3
+
 
 class CommunicationBackend:
     # Communication backend Interface
@@ -6,7 +13,7 @@ class CommunicationBackend:
         # Initialize the backend
         pass
 
-    def is_connected(self):
+    def get_comm_state(self) -> CommunicationState:
         # Indicate the port is open or bluetooth is connected
         pass
 
@@ -23,10 +30,10 @@ class CommunicationBackend:
         # Write data out via the backend
         pass
 
-    def sent_bytes(self):
+    def sent_bytes(self) -> int:
         # The number of packets sent of the interface
         pass
 
-    def rec_bytes(self):
+    def rec_bytes(self) -> int:
         # The number of packets received on the interface
         pass
