@@ -1,4 +1,5 @@
 from communication.interface import CommunicationBackend
+from communication.interface import CommunicationState
 
 import log
 import structlog
@@ -28,27 +29,37 @@ class BluetoothBackend(CommunicationBackend):
         self.bytes_tx = 0
         self.bytes_rx = 0
         self.running = False
-        self.connected = False
+        self.comm_state = CommunicationState.DISCONNECTED
         self.mac_address = config["mac_address"]
 
     def connect(self):
+        with self.lock:
+            if self.running:
+                logger.warn("connect was called on a backend that is currently running")
+                return
+
+            # Mark that we are now running
+            self.running = True
+
         self.cmd_queue = Queue(maxsize=50)
         def start():
-            with self.lock:
-                self.running = True
-                self.connected = False
+           while self.running:
+                # Continuously connect to the bluetooth module
+                logger.info("Connecting...", mac_address=self.mac_address)
 
-            try:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                loop.run_until_complete(self.run_comms(loop))
-            except Exception as e:
-                logger.warning("Error in comm loop", e=e)
-            finally:
-                with self.lock:
-                    print("Updating")
-                    self.running = False
-                    self.connected = False
+                try:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    loop.run_until_complete(self.run_comms(loop))
+                except BleakError as e:
+                    if "was not found" in str(e):
+                        logger.warning("Device not found", error=e)
+                except Exception as e:
+                    logger.warning("Error in comm loop", e=e)
+                finally:
+                    logger.warn("Communication attempt ended")
+                    with self.lock:
+                        self.connected = False
 
         # Start Asysnc communication thread
         self.comm_thread = Thread(target=start)
@@ -58,9 +69,9 @@ class BluetoothBackend(CommunicationBackend):
         # Set flag to stop communication thread
         self.running = False
 
-    def is_connected(self):
+    def get_comm_state(self) -> CommunicationState:
         with self.lock:
-            return self.connected
+            return self.comm_state
 
     def read(self):
         # For now lets not read from the bluetooth module
@@ -73,11 +84,11 @@ class BluetoothBackend(CommunicationBackend):
         except Full:
             logger.warning("Command queue is full")
 
-    def sent_bytes(self):
+    def sent_bytes(self) -> int:
         with self.lock:
             return self.bytes_tx
 
-    def rec_bytes(self):
+    def rec_bytes(self) -> int:
         with self.lock:
             return self.bytes_rx
 
@@ -85,13 +96,13 @@ class BluetoothBackend(CommunicationBackend):
         def disconnected_callback(client):
             logger.warn("Bluetooth disconnected callback called!")
             with self.lock:
-                # self.connected = False
-                # self.running = False
-                pass
+                # Lost connection, attempting to reconnect
+                self.comm_state = CommunicationState.CONNECTING
 
-        self.connected = True
         async with BleakClient(self.mac_address, loop=loop, disconnected_callback=disconnected_callback) as client:
-            running = self.running
+            with self.lock:
+                running = self.running
+                self.comm_state = CommunicationState.CONNECTED
 
             while running:
                 try:

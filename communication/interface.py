@@ -13,6 +13,10 @@ class CommunicationBackend:
         # Initialize the backend
         pass
 
+    def is_running(self) -> bool:
+        # is the backend currently running
+        pass
+
     def get_comm_state(self) -> CommunicationState:
         # Indicate the port is open or bluetooth is connected
         pass
