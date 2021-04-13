@@ -27,10 +27,16 @@ ApplicationWindow {
             lblConnDetails.text = "Communication State: " + comm_state + " Bytes -- Sent: " + sent + " Received: " + received
         }
 
-        function onConnectionJoysticksChanged(joystick_1_summary, joystick_2_summary) {
+        function onConnectionJoysticksChanged(joystick_count_summary, joystick_1_summary, joystick_2_summary) {
             joystick1Values.text = joystick_1_summary
             joystick2Values.text = joystick_2_summary
+            joystickCount.text = joystick_count_summary
         }
+
+        function onAvailableSourceChanged(sources_str) {
+            avialableSources.text = sources_str
+        }
+
     }
 
     menuBar: MenuBar {
@@ -140,12 +146,14 @@ ApplicationWindow {
                 font.pointSize: 10
                 text: "Joystick Count:"
             }
-            Text {
+            TextEdit {
                 id: joystickCount
+                readOnly: true
                 Layout.alignment: Qt.AlignLeft
+                selectByMouse: true
                 color: "black"
                 font.pointSize: 10
-                text: "0"
+                text: "Unknown"
             }
         }
 
@@ -183,6 +191,27 @@ ApplicationWindow {
             Text {
                 id: joystick2Values
                 Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Unknown"
+            }
+        }
+        RowLayout {
+            spacing: 20
+            Layout.leftMargin: 10
+
+            Text {
+                id: avialableSourcesLabel
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Available Sources:"
+            }
+            TextEdit {
+                id: avialableSources
+                readOnly: true
+                Layout.alignment: Qt.AlignLeft
+                selectByMouse: true
                 color: "black"
                 font.pointSize: 10
                 text: "Unknown"

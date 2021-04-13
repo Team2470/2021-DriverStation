@@ -8,7 +8,8 @@ logger = structlog.get_logger()
 
 
 class JoystickState:
-    def __init__(self, axis, buttons, hats):
+    def __init__(self, id, axis, buttons, hats):
+        self.id = id
         self.axis = axis
         self.buttons = buttons
         self.hats = hats
@@ -30,7 +31,7 @@ class JoystickState:
             hats.append(stick.get_hat(i))
         hats = list(map(lambda x: bool(x), hats))
 
-        return JoystickState(axis, buttons, hats)
+        return JoystickState(stick.get_guid(), axis, buttons, hats)
 
     @staticmethod
     def fix_axis(x):
@@ -56,19 +57,34 @@ class JoystickState:
     #     if x = 0
 
     def get_summary(self) -> str:
+        axis= [0, 0, 0, 0, 0, 0 ]
+
+        length = len(self.axis)
+        if length >= 1:
+            axis[0] = self.axis[0]
+        if length >= 2:
+            axis[1] = self.axis[1]
+        if length >= 3:
+            axis[2] = self.axis[2]
+        if length >= 4:
+            axis[3] = self.axis[3]
+        if length >= 5:
+            axis[4] = self.axis[4]
+        if length >= 6:
+            axis[5] = self.axis[5]
         axis_string = "Axis 0: {:.2f} 1: {:.2f} 2: {:.2f} 3: {:.2f} 4: {:.2f} 5: {:.2f}".format(
-            self.axis[0] if len(self.buttons) <= 1 else 0,
-            self.axis[1] if len(self.buttons) <= 2 else 0,
-            self.axis[2] if len(self.buttons) <= 3 else 0,
-            self.axis[3] if len(self.buttons) <= 4 else 0,
-            self.axis[4] if len(self.buttons) <= 5 else 0,
-            self.axis[5] if len(self.buttons) <= 6 else 0,
+            axis[0],
+            axis[1],
+            axis[2],
+            axis[3],
+            axis[4],
+            axis[5],
         )
 
         pressed_buttons = []
         for buttonNum, pressed in enumerate(self.buttons):
             if pressed:
-                pressed_buttons.append(buttonNum)
+                pressed_buttons.append(str(buttonNum))
         if len(pressed_buttons) == 0:
             pressed_buttons.append("None")
 

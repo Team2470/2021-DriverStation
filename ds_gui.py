@@ -1,5 +1,6 @@
 import sys
 from os.path import abspath, dirname, join
+import pygame
 
 from PySide2.QtQuick import QQuickView
 from PySide2.QtCore import QObject, Signal, Slot, QThread, QTimer
@@ -8,14 +9,20 @@ from PySide2.QtQml import QQmlApplicationEngine
 
 from driver_station import DriverStation
 from communication import CommunicationState
+from communication import serial_sources
+from communication import bluetooth_sources
 
 import structlog
+import time
+import asyncio
+from threading import Thread
 
 
 class ViewModelMain(QObject):
     connectionChanged = Signal(bool, arguments=['connected'])
     connectionDetailsChanged = Signal(str, int, int, arguments=['comm_state', 'sent', 'recieved'])
-    connectionJoysticksChanged = Signal(str, str, arguments=['joystick_1_summary', 'joystick_2_summary'])
+    connectionJoysticksChanged = Signal(str, str, str, arguments=['joystick_count_summary', 'joystick_1_summary', 'joystick_2_summary'])
+    availableSourceChanged = Signal(str, arguments=['sources_str'])
 
     def __init__(self, ds):
         self.logger = structlog.get_logger()
@@ -25,6 +32,10 @@ class ViewModelMain(QObject):
         self.timer = QTimer()
         self.timer.timeout.connect(self.joystick_manager_tick)
         self.timer.start(20)  # Poll at 50 HZ
+
+        # Available sources tasks
+        self.avialable_source_thread = Thread(target=self.available_source_run)
+        self.avialable_source_thread.start()
 
         # Communications Thread
         self.thread = QThread()
@@ -108,9 +119,49 @@ class ViewModelMain(QObject):
         if 2 in self.ds.joystick_manager.joysticks:
             j2_summary = self.ds.joystick_manager.joysticks[2].get_summary()
 
-        self.connectionJoysticksChanged.emit(j1_summary, j2_summary)
+        ids = []
+        for joystick in [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]:
+            ids.append(joystick.get_guid())
+
+        j_summary = "{} - Available UUIDs: [{}]".format(
+            pygame.joystick.get_count(),
+            " ,".join(ids)
+        )
+
+        self.connectionJoysticksChanged.emit(j_summary, j1_summary, j2_summary)
 
         self.timer.start(20) # 50 Hz
+
+    def available_source_run(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        while True: # TODO this needs to exit
+            # self.logger.info("Updating available source")
+
+            available_sources_str = "unknown"
+
+            if ds.config["communication_backend"] == "serial":
+                ports = serial_sources.available_ports()
+                if len(ports) == 0:
+                    available_sources_str = "none"
+                else:
+                    available_sources_str = "\n".join(ports)
+            elif ds.config["communication_backend"] == "bluetooth":
+                devices = bluetooth_sources.avaiable_devices()
+                if len(devices) == 0:
+                    available_sources_str = "none"
+                else:
+                    device_strs = []
+                    for device in devices:
+                        device_str = "Address: "+ device.address + "\tName:" + device.name
+                        device_strs.append(device_str)
+                    available_sources_str = "\n".join(device_strs)
+
+
+            self.availableSourceChanged.emit(available_sources_str)
+
+            time.sleep(1)
 
 
 if __name__ == "__main__":
