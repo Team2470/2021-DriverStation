@@ -136,7 +136,7 @@ class BluetoothBackend(CommunicationBackend):
                     logger.debug("Received packet", cmd=cmd)
 
                     await client.write_gatt_char(UUID_TX, cmd, False)
-                    await asyncio.sleep(0.01) # TODO remove, this is probably not needed
+                    # await asyncio.sleep(0.01) # TODO remove, this is probably not needed
                 except Empty:
                     logger.debug("No command packet is available")
 

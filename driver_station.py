@@ -181,7 +181,7 @@ class DriverStation(QObject):
             self.logger.debug("Updating comm stats", comm_state=comm_state_str, sent_bytes=sent_bytes, rec_bytes=rec_bytes)
             self.comms_stats.emit(comm_state_str, sent_bytes, rec_bytes)
 
-            time.sleep(0.05)
+            time.sleep(0.075)
 
         self.logger.warn("Main loop ending")
         self.finished.emit()
