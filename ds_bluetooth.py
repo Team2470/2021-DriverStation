@@ -14,20 +14,20 @@ from datetime import datetime
 address = "74B1AEEB-6720-4DCB-94BC-623775EA3529"
 
 # Discover available devices
-async def run():
-    device_found = False
-    while not device_found:
-        print("Scanning for device...")
-        devices = await BleakScanner.discover()
-        for d in devices:
-            print("Address:", d.address, "Name:", d.name)
-            if d.address == address:
-                print("Device found!")
-                device_found = True
-                break
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(run())
+# async def run():
+#     device_found = False
+#     while not device_found:
+#         print("Scanning for device...")
+#         devices = await BleakScanner.discover()
+#         for d in devices:
+#             print("Address:", d.address, "Name:", d.name)
+#             if d.address == address:
+#                 print("Device found!")
+#                 device_found = True
+#                 break
+#
+# loop = asyncio.get_event_loop()
+# loop.run_until_complete(run())
 
 # Connect to device and read its model number
 # 74B1AEEB-6720-4DCB-94BC-623775EA3529: ELEGOO BT16

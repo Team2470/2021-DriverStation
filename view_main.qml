@@ -6,7 +6,7 @@ import QtQuick.Controls.Material 2.12
 ApplicationWindow {
     id: window
     width: 900
-    height: 200
+    height: 250
     visible: true
     title: "2021 TP Driver Station"
 
@@ -20,12 +20,23 @@ ApplicationWindow {
             // Odd hack to force our properties below to update
             // There should be a better way to do this
             connChanged++
-            lblConnDetails.text = "Bytes -- Sent: " + 0 + " Received: " + 0
+            // lblConnDetails.text = "Communication State: UNKNOWN Bytes -- Sent: " + 0 + " Received: " + 0
         }
 
-        function onConnectionDetailsChanged(sent, received) {
-            lblConnDetails.text = "Bytes -- Sent: " + sent + " Received: " + received
+        function onConnectionDetailsChanged(comm_state, sent, received) {
+            lblConnDetails.text = "Communication State: " + comm_state + " Bytes -- Sent: " + sent + " Received: " + received
         }
+
+        function onConnectionJoysticksChanged(joystick_count_summary, joystick_1_summary, joystick_2_summary) {
+            joystick1Values.text = joystick_1_summary
+            joystick2Values.text = joystick_2_summary
+            joystickCount.text = joystick_count_summary
+        }
+
+        function onAvailableSourceChanged(sources_str) {
+            avialableSources.text = sources_str
+        }
+
     }
 
     menuBar: MenuBar {
@@ -49,7 +60,7 @@ ApplicationWindow {
     GridLayout {
         id: grid
         columns: 1
-        rows: 2
+        rows: 5
 
 
         RowLayout {
@@ -64,10 +75,10 @@ ApplicationWindow {
                     Layout.preferredHeight: 50
                     Material.accent: connChanged, con.is_connected() ? Material.Blue : Material.Grey
                     onClicked: {
-                        if (!con.is_connected()) {
-                            con.connect()
-                        } else {
+                        if (con.is_connected() || con.is_connecting()) {
                             con.disconnect()
+                        } else {
+                            con.connect()
                         }
                     }
             }
@@ -124,6 +135,89 @@ ApplicationWindow {
                     }
             }
         }
+
+        RowLayout {
+            Layout.leftMargin: 10
+
+            Text {
+                id: joystickCountLabel
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Joystick Count:"
+            }
+            TextEdit {
+                id: joystickCount
+                readOnly: true
+                Layout.alignment: Qt.AlignLeft
+                selectByMouse: true
+                color: "black"
+                font.pointSize: 10
+                text: "Unknown"
+            }
+        }
+
+        RowLayout {
+            spacing: 20
+            Layout.leftMargin: 10
+
+            Text {
+                id: joystick1Label
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Joystick 1 State:"
+            }
+            Text {
+                id: joystick1Values
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Unknown"
+            }
+        }
+
+        RowLayout {
+            spacing: 20
+            Layout.leftMargin: 10
+
+            Text {
+                id: joystick2Label
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Joystick 2 State:"
+            }
+            Text {
+                id: joystick2Values
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Unknown"
+            }
+        }
+        RowLayout {
+            spacing: 20
+            Layout.leftMargin: 10
+
+            Text {
+                id: avialableSourcesLabel
+                Layout.alignment: Qt.AlignLeft
+                color: "black"
+                font.pointSize: 10
+                text: "Available Sources:"
+            }
+            TextEdit {
+                id: avialableSources
+                readOnly: true
+                Layout.alignment: Qt.AlignLeft
+                selectByMouse: true
+                color: "black"
+                font.pointSize: 10
+                text: "Unknown"
+            }
+        }
+
     }
 
     footer: ToolBar {

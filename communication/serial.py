@@ -1,11 +1,11 @@
-from communication.interface import CommunicationBackend
+from communication.interface import CommunicationBackend, CommunicationState
 from serial import Serial
 
 import log
 import structlog
 
 # Setup logging
-log.setup()
+# log.setup()
 logger = structlog.get_logger()
 
 
@@ -25,6 +25,7 @@ class SerialBackend(CommunicationBackend):
         # Stats
         self._sent_bytes = 0
         self._received_bytes = 0
+        self._running = False
 
     def connect(self):
         logger.info("Trying to open serial port", port=self.port.port)
@@ -32,12 +33,19 @@ class SerialBackend(CommunicationBackend):
         self._received_bytes = 0
         self.port.open()
 
+        self._running = True
+
     def disconnect(self):
         logger.info("Trying to close serial port", port=self.port.port)
         self.port.close()
 
-    def is_connected(self):
-        return self.port.is_open
+    def is_running(self) -> bool:
+        return self._running
+
+    def get_comm_state(self) -> CommunicationState:
+        if self.port.is_open:
+            return CommunicationState.CONNECTED
+        return CommunicationState.DISCONNECTED
 
     def read(self):
         data = self.port.readline()
@@ -46,7 +54,7 @@ class SerialBackend(CommunicationBackend):
             logger.warn("Empty response")
             return
 
-        # TODO this data needs to get piped somehwere better, so the logout is not
+        # TODO this data needs to get piped somewhere better, so the logout is not
         # horrible
         logger.info("Arduino:", data=data)
 
@@ -54,8 +62,8 @@ class SerialBackend(CommunicationBackend):
         self.port.write(data)
         self._sent_bytes += len(data)
 
-    def sent_bytes(self):
+    def sent_bytes(self) -> int:
         return self._sent_bytes
 
-    def rec_bytes(self):
+    def rec_bytes(self) -> int:
         return self._received_bytes
