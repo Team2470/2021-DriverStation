@@ -42,7 +42,7 @@ class BluetoothBackend(CommunicationBackend):
             # Mark that we are now running
             self.running = True
 
-        self.cmd_queue = Queue(maxsize=50)
+        self.cmd_queue = Queue(maxsize=5)
         def start():
             while self.running:
                 # Continuously connect to the bluetooth module
@@ -100,7 +100,7 @@ class BluetoothBackend(CommunicationBackend):
             return self.bytes_rx
 
     def uart_data_received(self, sender, data):
-        print( "RX> {0}".format(data))
+        #print( "RX> {0}".format(data))
 
         self.bytes_rx += len(data)
         if len(data) == 0:
@@ -123,7 +123,6 @@ class BluetoothBackend(CommunicationBackend):
                 running = self.running
                 self.comm_state = CommunicationState.CONNECTED
 
-
             # Start receiver
             await client.start_notify(UUID_RX, self.uart_data_received)
 
@@ -133,10 +132,14 @@ class BluetoothBackend(CommunicationBackend):
                     cmd = self.cmd_queue.get(timeout=1) # Block for up to 1 second
                     with self.lock:
                         self.bytes_tx += len(cmd)
-                    logger.debug("Received packet", cmd=cmd)
 
-                    await client.write_gatt_char(UUID_TX, cmd, False)
-                    # await asyncio.sleep(0.01) # TODO remove, this is probably not needed
+                    # HACK
+                    # On my windows machine, seting more than 20 characters as a time appears to crash
+                    # bluetooth.  So lets limit the packets for now.
+                    MAX_PACKET=20
+                    split = [cmd[i:i+MAX_PACKET] for i in range(0, len(cmd), MAX_PACKET)]
+                    for chunk in split:
+                        await client.write_gatt_char(UUID_TX, chunk, False)#,
                 except Empty:
                     logger.debug("No command packet is available")
 
