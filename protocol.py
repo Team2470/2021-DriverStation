@@ -5,12 +5,12 @@ from suitcase.fields import BaseField
 from suitcase.fields import Magic
 from suitcase.fields import CRCField
 
-PACKET_START_CHAR = b'\xaa'
+PACKET_START_CHAR = b'\x24'
 PROTOCOL_FLOAT_LENGTH = 7
 PROTOCOL_UINT16_LENGTH = 2
 PROTOCOL_UINT8_LENGTH = 1
 
-MSGID_DS_CONTROL = b'\x55'
+MSGID_DS_CONTROL = b'\x70'
 DS_CONTROL_LENGTH  = 11
 
 
@@ -111,4 +111,4 @@ class ControlPacket(Structure):
     axis4 = ProtocolUInt8()
     axis5 = ProtocolUInt8()
 
-    checksum = CRCField(ProtocolUInt8(), checksum, 0, -2)
+    checksum = CRCField(ProtocolUInt8(), checksum, 0, -1)
