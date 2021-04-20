@@ -136,10 +136,13 @@ class BluetoothBackend(CommunicationBackend):
                     # HACK
                     # On my windows machine, seting more than 20 characters as a time appears to crash
                     # bluetooth.  So lets limit the packets for now.
+                    logger.debug("Sending cmd: ", cmd=cmd.hex())
                     MAX_PACKET=20
                     split = [cmd[i:i+MAX_PACKET] for i in range(0, len(cmd), MAX_PACKET)]
                     for chunk in split:
                         await client.write_gatt_char(UUID_TX, chunk, False)#,
+
+                    logger.debug("Command sent")
                 except Empty:
                     logger.debug("No command packet is available")
 
