@@ -92,43 +92,6 @@ class JoystickState:
 
         return axis_string + "; " + button_string
 
-
-    def get_joystick_1_pkt(self):
-        # Build up the joystick 1 packet
-        pkt = protocol.Joystick1Packet()
-        length = self.axis
-        if len(length) <= 1:
-            pkt.axis0 = self.axis[0]
-        if len(length) <= 2:
-            pkt.axis1 = self.axis[1]
-        if len(length) <= 3:
-            pkt.axis2 = self.axis[2]
-        if len(length) <= 4:
-            pkt.axis3 = self.axis[3]
-        if len(length) <= 5:
-            pkt.axis4 = self.axis[4]
-        if len(length) <= 6:
-            pkt.axis5 = self.axis[5]
-        pkt.buttonWord = self.button_word()
-
-    def get_joystick_2_pkt(self):
-        # Build up the joystick 1 packet
-        pkt = protocol.Joystick2Packet()
-        length = self.axis
-        if len(length) <= 1:
-            pkt.axis0 = self.axis[0]
-        if len(length) <= 2:
-            pkt.axis1 = self.axis[1]
-        if len(length) <= 3:
-            pkt.axis2 = self.axis[2]
-        if len(length) <= 4:
-            pkt.axis3 = self.axis[3]
-        if len(length) <= 5:
-            pkt.axis4 = self.axis[4]
-        if len(length) <= 6:
-            pkt.axis5 = self.axis[5]
-        pkt.buttonWord = self.button_word()
-
 class JoystickManager:
     def __init__(self, joystick_mapping):
         self.__joysticks = {}

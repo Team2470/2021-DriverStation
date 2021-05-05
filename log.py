@@ -18,7 +18,7 @@ def setup(config):
         config = {}
 
     # Setup logging!
-    timestamper = structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S")
+    timestamper = structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S.%f")
     pre_chain = [
         # Add the log.py level and a timestamp to the event_dict if the log.py entry
         # is not from structlog.
@@ -46,7 +46,7 @@ def setup(config):
 
     logging.config.dictConfig({
             "version": 1,
-            "disable_existing_loggers": False,
+            "disable_existing_loggers": True,
             "formatters": {
                 "plain": {
                     "()": structlog.stdlib.ProcessorFormatter,
@@ -67,7 +67,8 @@ def setup(config):
                 },
                 "file": {
                     "level": "DEBUG",
-                    "class": "logging.handlers.WatchedFileHandler",
+                    "class": "logging.FileHandler",
+                    "mode": 'w',
                     "filename": "ds_gui.log",
                     "formatter": "plain",
                 },
@@ -75,35 +76,35 @@ def setup(config):
             "loggers": {
                 # use the following to control log levels
                 "": {
-                    # "handlers": ["default"],
-                    "handlers": ["default", "file"],
+                    "handlers": ["default"],
+                    #"handlers": ["default", "file"],
                     "level": global_log_level,
-                    "propagate": True,
+                    "propagate": False,
                 },
                 "communication.serial": {
-                    # "handlers": ["default"],
-                    "handlers": ["default", "file"],
+                    "handlers": ["default"],
+                    #"handlers": ["default", "file"],
                     "level": serial_log_level,
-                    "propagate": True,
+                    "propagate": False,
                 },
                 "communication.bluetooth": {
-                    # "handlers": ["default"],
-                    "handlers": ["default", "file"],
+                    "handlers": ["default"],
+                    # "handlers": ["default", "file"],
                     "level": bluetooth_log_level,
-                    "propagate": True,
+                    "propagate": False,
 
                 },
                 "bleak": {
-                    # "handlers": ["default"],
-                    "handlers": ["default", "file"],
+                    "handlers": ["default"],
+                    # "handlers": ["default", "file"],
                     "level": bleak_log_level,
-                    "propagate": True,
+                    "propagate": False,
                 },
                 "driver_station": {
-                    # "handlers": ["default"],
-                    "handlers": ["default", "file"],
+                    "handlers": ["default"],
+                    # "handlers": ["default", "file"],
                     "level": driver_station_log_level,
-                    "propagate": True,
+                    "propagate": False,
                 }
             }
     })

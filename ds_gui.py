@@ -21,7 +21,7 @@ from threading import Thread
 class ViewModelMain(QObject):
     connectionChanged = Signal(bool, arguments=['connected'])
     connectionDetailsChanged = Signal(str, int, int, arguments=['comm_state', 'sent', 'recieved'])
-    connectionJoysticksChanged = Signal(str, str, str, arguments=['joystick_count_summary', 'joystick_1_summary', 'joystick_2_summary'])
+    connectionJoysticksChanged = Signal(str, str, arguments=['joystick_count_summary', 'joystick_1_summary'])
     availableSourceChanged = Signal(str, arguments=['sources_str'])
 
     def __init__(self, ds):
@@ -115,10 +115,6 @@ class ViewModelMain(QObject):
         if 1 in self.ds.joystick_manager.joysticks:
             j1_summary = self.ds.joystick_manager.joysticks[1].get_summary()
 
-        j2_summary = "Not Connected"
-        if 2 in self.ds.joystick_manager.joysticks:
-            j2_summary = self.ds.joystick_manager.joysticks[2].get_summary()
-
         ids = []
         for joystick in [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]:
             ids.append(joystick.get_guid())
@@ -128,7 +124,7 @@ class ViewModelMain(QObject):
             " ,".join(ids)
         )
 
-        self.connectionJoysticksChanged.emit(j_summary, j1_summary, j2_summary)
+        self.connectionJoysticksChanged.emit(j_summary, j1_summary)
 
         self.timer.start(20) # 50 Hz
 

@@ -27,9 +27,8 @@ ApplicationWindow {
             lblConnDetails.text = "Communication State: " + comm_state + " Bytes -- Sent: " + sent + " Received: " + received
         }
 
-        function onConnectionJoysticksChanged(joystick_count_summary, joystick_1_summary, joystick_2_summary) {
+        function onConnectionJoysticksChanged(joystick_count_summary, joystick_1_summary) {
             joystick1Values.text = joystick_1_summary
-            joystick2Values.text = joystick_2_summary
             joystickCount.text = joystick_count_summary
         }
 
@@ -177,25 +176,6 @@ ApplicationWindow {
             }
         }
 
-        RowLayout {
-            spacing: 20
-            Layout.leftMargin: 10
-
-            Text {
-                id: joystick2Label
-                Layout.alignment: Qt.AlignLeft
-                color: "black"
-                font.pointSize: 10
-                text: "Joystick 2 State:"
-            }
-            Text {
-                id: joystick2Values
-                Layout.alignment: Qt.AlignLeft
-                color: "black"
-                font.pointSize: 10
-                text: "Unknown"
-            }
-        }
         RowLayout {
             spacing: 20
             Layout.leftMargin: 10

@@ -9,14 +9,14 @@ logging:
   bleak_level: INFO
 
 serial:
-  baudrate: 57600
-  port: /dev/cu.usbmodem00001
+  baudrate: 115200
+  port: COM4
   timeout: 5 # Seconds
 
 bluetooth:
-  mac_address: 74B1AEEB-6720-4DCB-94BC-623775EA3529
+  mac_address: 48:87:2D:14:8D:2E
 
 # Joystick UUID mapping to number
 # TODO This will be updated by the driverstation
 joystick_mapping:
-  030000006d04000016c2000014040000: 1
+  030000005e040000ff02000000007200: 1

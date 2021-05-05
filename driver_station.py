@@ -27,6 +27,7 @@ class DriverStation(QObject):
         super().__init__()
         self.logger = structlog.get_logger()
         self.config = {}
+        self.control_packet = protocol.ControlPacket();
 
     def load_settings(self, file_path):
         with open("config.yaml", 'r') as f:
@@ -112,66 +113,36 @@ class DriverStation(QObject):
     def _main_loop(self):
         self.logger.info("Starting main loop...")
         while self.running:
-            # Control packet
-            pkt = protocol.ControlPacket()
+            start_loop = time.time()
 
+            self.logger.debug("Creating control packet")
             # For now, just set enabled
-            pkt.controlByte = 0
-            pkt.controlByte += (1 << 4) if self.enabled else 0x00
-            p = pkt.pack()
-            #self.logger.info("Control packet", p=p)
-            self.logger.debug("Sending control packet", p=p)
-            self.communication_backend.write(p)
+            self.control_packet.controlByte = 0
+            self.control_packet.controlByte += (1 << 4) if self.enabled else 0x00
 
             # Right now just the first joystick, figure out how to properly handle joysticks later...
             if 1 in self.joystick_manager.joysticks:
                 joystick = self.joystick_manager.joysticks[1]
 
                 # Build up the joystick 1 packet
-                pkt = protocol.Joystick1Packet()
                 length = len(joystick.axis)
                 if length >= 1:
-                    pkt.axis0 = joystick.axis[0]
+                    self.control_packet.axis0 = joystick.axis[0]
                 if length >= 2:
-                    pkt.axis1 = joystick.axis[1]
+                    self.control_packet.axis1 = joystick.axis[1]
                 if length >= 3:
-                    pkt.axis2 = joystick.axis[2]
+                    self.control_packet.axis2 = joystick.axis[2]
                 if length >= 4:
-                    pkt.axis3 = joystick.axis[3]
+                    self.control_packet.axis3 = joystick.axis[3]
                 if length >= 5:
-                    pkt.axis4 = joystick.axis[4]
+                    self.control_packet.axis4 = joystick.axis[4]
                 if length >= 6:
-                    pkt.axis5 = joystick.axis[5]
-                pkt.buttonWord = joystick.button_word()
+                    self.control_packet.axis5 = joystick.axis[5]
+                self.control_packet.buttonWord = joystick.button_word()
 
-                p = pkt.pack()
-                self.logger.debug("Sending joystick1 packet", p=p)
-                self.communication_backend.write(p)
-
-            # Right now just the first joystick, figure out how to properly handle joysticks later...
-            if 2 in self.joystick_manager.joysticks:
-                joystick = self.joystick_manager.joysticks[2]
-
-                # Build up the joystick 1 packet
-                pkt = protocol.Joystick2Packet()
-                length = len(joystick.axis)
-                if length >= 1:
-                    pkt.axis0 = joystick.axis[0]
-                if length >= 2:
-                    pkt.axis1 = joystick.axis[1]
-                if length >= 3:
-                    pkt.axis2 = joystick.axis[2]
-                if length >= 4:
-                    pkt.axis3 = joystick.axis[3]
-                if length >= 5:
-                    pkt.axis4 = joystick.axis[4]
-                if length >= 6:
-                    pkt.axis5 = joystick.axis[5]
-                pkt.buttonWord = joystick.button_word()
-
-                p = pkt.pack()
-                self.logger.debug("Sending joystick2 packet", p=p)
-                self.communication_backend.write(p)
+            p = self.control_packet.pack()
+            self.logger.debug("Sending control packet", p=p.hex())
+            self.communication_backend.write(p)
 
             # Update read/write
             comm_state_str = self.get_comm_state_str()
@@ -181,7 +152,12 @@ class DriverStation(QObject):
             self.logger.debug("Updating comm stats", comm_state=comm_state_str, sent_bytes=sent_bytes, rec_bytes=rec_bytes)
             self.comms_stats.emit(comm_state_str, sent_bytes, rec_bytes)
 
-            time.sleep(0.1)
+            # Take into account elapsed time before starting
+            elapsed = time.time() - start_loop
+            self.logger.debug("Remaining: %f", 0.070 - elapsed)
+            if (elapsed < 0.070):
+                time.sleep(0.070 - elapsed)
+
 
         self.logger.warn("Main loop ending")
         self.finished.emit()
