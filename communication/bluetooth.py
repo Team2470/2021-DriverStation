@@ -42,7 +42,7 @@ class BluetoothBackend(CommunicationBackend):
             # Mark that we are now running
             self.running = True
 
-        self.cmd_queue = Queue(maxsize=5)
+        self.cmd_queue = Queue(maxsize=1)
         def start():
             while self.running:
                 # Continuously connect to the bluetooth module
